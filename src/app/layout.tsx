@@ -26,8 +26,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isTouchDevice =
-    "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const isTouchDevice = false;
   return (
     <html lang="en">
       <head>
