@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Segmented } from 'antd';
 import { ControlGroup, SelectControl, SliderControl, InputControl, Label } from '../ui/controls';
-import { defaultAnimationConfig, animationEffects, animationDirections, playDirections } from '@/utils/config/defaults';
+import { defaultAnimationConfig, animationEffects, animationDirections, playDirections, animationEasingTypes } from '@/utils/config/defaults';
 
 interface AnimationDrawerProps {
     open: boolean;
@@ -47,7 +47,7 @@ const AnimationDrawer = ({ open, onClose, onSave, initialData }: AnimationDrawer
         { value: 'click', label: 'Click' },
     ];
 
-    const settings = data[activeCategory] || { effect: 'none', direction: 'none', animationDirection: 'normal', delay: 0, speed: 1 };
+    const settings = data[activeCategory] || { effect: 'none', direction: 'none', animationDirection: 'normal', transitionType: 'ease', delay: 0, speed: 1 };
 
     return (
         <Drawer
@@ -106,6 +106,15 @@ const AnimationDrawer = ({ open, onClose, onSave, initialData }: AnimationDrawer
                             value={settings.animationDirection}
                             onChange={(val) => updateAnimation(activeCategory, 'animationDirection', val)}
                             options={playDirections}
+                        />
+                    </ControlGroup>
+
+                    <ControlGroup label="Transition Type">
+                        <SelectControl
+                            width="w-full"
+                            value={settings.transitionType}
+                            onChange={(val) => updateAnimation(activeCategory, 'transitionType', val)}
+                            options={animationEasingTypes}
                         />
                     </ControlGroup>
 

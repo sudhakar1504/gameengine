@@ -42,6 +42,7 @@ const defaultAnimSettings = {
     effect: 'none',
     direction: 'none',
     animationDirection: 'normal',
+    transitionType: 'ease',
     delay: 0,
     speed: 1,
 };
@@ -80,6 +81,16 @@ export const playDirections = [
     { label: "Reverse", value: "reverse" },
     { label: "Alternate", value: "alternate" },
     { label: "Alternate Reverse", value: "alternate-reverse" },
+];
+
+export const animationEasingTypes = [
+    { label: "Ease", value: "ease" },
+    { label: "Linear", value: "linear" },
+    { label: "Ease In", value: "ease-in" },
+    { label: "Ease Out", value: "ease-out" },
+    { label: "Ease In Out", value: "ease-in-out" },
+    { label: "Step Start", value: "step-start" },
+    { label: "Step End", value: "step-end" },
 ];
 
 export const fontFamilies = [

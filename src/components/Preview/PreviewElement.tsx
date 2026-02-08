@@ -51,7 +51,8 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
             keyframeName = `slide-${anim.direction}`;
         }
         const playDirection = anim.animationDirection || 'normal';
-        let s = `${keyframeName} ${anim.speed || 1}s ease ${anim.delay || 0}s ${playDirection} both`;
+        const transitionType = anim.transitionType || 'ease';
+        let s = `${keyframeName} ${anim.speed || 1}s ${transitionType} ${anim.delay || 0}s ${playDirection} both`;
         if (loop) {
             s += ' infinite' // removed alternate since it's now handled by playDirection
         }

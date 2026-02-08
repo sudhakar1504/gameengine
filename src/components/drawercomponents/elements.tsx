@@ -2,6 +2,7 @@ import { Collapse, Modal, Button } from 'antd';
 import React, { useState } from 'react'
 import { defaultImageConfig, defaultTextConfig, defaultAudioConfig, defaultAnimationConfig } from '@/utils/config/defaults';
 import { audioList } from '@/utils/config/audioList';
+import { imageList } from '@/utils/config/imageList';
 
 const Elements = ({ setData, setElementsOpen }: any) => {
     const elementData: any = {
@@ -87,57 +88,7 @@ const Elements = ({ setData, setElementsOpen }: any) => {
         }
     ];
 
-    const imgData = [
-        {
-            id: 1,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/8f293231-acf4-48b4-85ac-62466e7f4480.gif",
-            icon: <i className="fa-solid fa-image"></i>
-        },
-        {
-            id: 2,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/a44f666b-78b0-44e1-99dd-3707fdb746ad.png",
-            icon: <i className="fa-solid fa-image"></i>
-        },
-        {
-            id: 3,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/55672a47-a339-4d75-8da5-ff60a57b4823.png",
-            icon: <i className="fa-solid fa-image"></i>
-        },
-        {
-            id: 4,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/6ebf8e4a-04db-47d1-99c0-43dd4cc56037.png",
-            icon: <i className="fa-solid fa-image"></i>
-        },
-        {
-            id: 5,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/52abb919-f9dc-492e-a26e-6febeb8b449f.png",
-            icon: <i className="fa-solid fa-image"></i>
-        },
-        {
-            id: 6,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/1b59dd84-f376-442c-99ca-e6aeff607277.png",
-            icon: <i className="fa-solid fa-image"></i>
-        },
-        {
-            id: 7,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/d3ab05ef-215f-48a2-8df2-ee6fc8d5635a.png",
-            icon: <i className="fa-solid fa-image"></i>
-        }
-    ];
+
 
     const bgData = [
         {
@@ -157,9 +108,12 @@ const Elements = ({ setData, setElementsOpen }: any) => {
                 {textData.map((element: any) => (
                     <button onClick={() => {
                         setData((prevData: any) => {
+                            const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1));
+                            const newZIndex = maxZIndex + 1;
                             return [...prevData, {
                                 ...elementData['text'],
                                 id: Date.now().toString(),
+                                zIndex: newZIndex
                             }]
                         })
                         setElementsOpen(null)
@@ -175,13 +129,16 @@ const Elements = ({ setData, setElementsOpen }: any) => {
             key: '2',
             label: 'Image',
             children: <div className='flex flex-wrap gap-2'>
-                {imgData.map((element: any) => (
+                {imageList.map((element: any) => (
                     <button onClick={() => {
                         setData((prevData: any) => {
+                            const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1));
+                            const newZIndex = maxZIndex + 1;
                             return [...prevData, {
                                 ...elementData['image'],
                                 id: Date.now().toString(),
                                 src: element.src,
+                                zIndex: newZIndex
                             }]
                         })
                         setElementsOpen(null)
@@ -201,12 +158,15 @@ const Elements = ({ setData, setElementsOpen }: any) => {
 
                         setData((prevData: any) => {
                             let bg = prevData.filter((item: any) => item.type === 'bg');
+                            const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1));
+                            const newZIndex = maxZIndex + 1;
                             if (bg.length > 0) {
                                 return prevData.map((item: any) => {
                                     if (item.type === 'bg') {
                                         return {
                                             ...item,
                                             src: element.src,
+                                            zIndex: newZIndex
                                         }
                                     }
                                     return item
@@ -215,7 +175,8 @@ const Elements = ({ setData, setElementsOpen }: any) => {
                                 return [...prevData, {
                                     id: Date.now().toString(),
                                     type: "bg",
-                                    src: element.src
+                                    src: element.src,
+                                    zIndex: newZIndex
                                 }]
                             }
                         })

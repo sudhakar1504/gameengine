@@ -53,7 +53,8 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
 
         const playDirection = anim.animationDirection || 'normal';
 
-        animStyle = `${keyframeName} ${speed}s ease ${delay}s ${playDirection} both`;
+        const transitionType = anim.transitionType || 'ease';
+        animStyle = `${keyframeName} ${speed}s ${transitionType} ${delay}s ${playDirection} both`;
 
         if (previewCategory === 'continuous') {
             animStyle += ' infinite'; // removed alternate since it's now handled by playDirection
@@ -232,7 +233,7 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
                     onClick={() => setSelectedID(item.id)}
                     style={{
                         position: "absolute",
-                        zIndex: item.zIndex || 1,
+                        zIndex: item?.zIndex || 1,
                         cursor: "move",
                         border: isSelected ? "1px solid #1890ff" : "1px solid transparent",
                         boxSizing: "border-box",
