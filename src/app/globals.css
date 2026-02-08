@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.draggable {
+  touch-action: none;
+  user-select: none;
+
+}
+.draggable:hover{
+  border: 1px dashed #909090 !important;
+}
+.draggable:focus-visible{
+  outline: 1px dashed #6b0000 !important;
+}

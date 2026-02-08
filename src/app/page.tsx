@@ -1,65 +1,107 @@
-import Image from "next/image";
+"use client"
+import Slideview from "@/components/Slide";
+import { useEffect, useState } from "react";
+import Topbar from "@/components/Topbar";
+import Sidebar from "@/components/sidebar";
+import { useRouter } from "next/navigation";
+import Preview from "@/components/Preview";
 
 export default function Home() {
+  const router = useRouter();
+  // pages
+  const [Allpages, setAllpages] = useState([
+    {
+      id: 1,
+      name: "page 1",
+      data: [
+
+      ],
+    },
+    {
+      id: 2,
+      name: "page 2",
+      data: [],
+    },
+    {
+      id: 3,
+      name: "page 3",
+      data: [],
+    },
+  ]);
+  const [SelectedPage, setSelectedPage] = useState(1);
+
+
+  const [SelectedID, setSelectedID] = useState(null);
+  const [Data, setData] = useState<any>([]);
+  const [isPreview, setIsPreview] = useState(false);
+
+  useEffect(() => {
+    setData(() => (Allpages[0]?.data));
+  }, []);
+
+  const saveCurrentData = () => {
+    setAllpages((prevData: any) => {
+      const newData = [...prevData];
+      const index = newData.findIndex((item: any) => item.id === SelectedPage);
+      if (index !== -1) {
+        newData[index] = {
+          ...newData[index],
+          data: Data
+        };
+      }
+      return newData;
+    });
+  };
+
+  const enterPreview = () => {
+    saveCurrentData();
+    setIsPreview(true);
+  };
+
+  if (isPreview) {
+    return (
+      <Preview
+        Allpages={Allpages}
+        onExit={() => setIsPreview(false)}
+        initialPageId={SelectedPage}
+      />
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="w-[100vw] h-[100dvh]">
+      {/* topbar */}
+      <div className="w-full h-[50px]">
+        <Topbar selectedItem={SelectedID} Data={Data} setData={setData} />
+      </div>
+      <div className="w-full h-[calc(100dvh-50px)]  flex">
+        {/* leftsidebar */}
+        <div className="w-[100px] h-full">
+          <Sidebar Allpages={Allpages} SelectedPage={SelectedPage} setSelectedPage={setSelectedPage} Data={Data} setData={setData} setAllpages={setAllpages} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        {/* canvas */}
+        <div className="w-[calc(100%-100px)] h-full  flex flex-col items-center justify-center bg-gray-200">
+          <div className="max-w-[1000px] max-h-[600px] w-full h-full border-2 border-black bg-white overflow-hidden shadow-2xl">
+            <Slideview Data={Data} setData={setData} SelectedID={SelectedID} setSelectedID={setSelectedID} Allpages={Allpages} />
+          </div>
+          <button
+            className="mt-4 px-8 py-2 bg-blue-600 text-white rounded-full font-bold shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2"
+            onClick={() => {
+              console.log("save", Allpages);
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <i className="fa-solid fa-play"></i>
+            Save
+          </button>
+          <button
+            className="mt-4 px-8 py-2 bg-blue-600 text-white rounded-full font-bold shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2"
+            onClick={enterPreview}
           >
-            Documentation
-          </a>
+            <i className="fa-solid fa-play"></i>
+            Preview
+          </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
