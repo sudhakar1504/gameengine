@@ -35,3 +35,7 @@ body {
 .draggable:focus-visible{
   outline: 1px dashed #6b0000 !important;
 }
+
+.rCS1w3zcxh{
+  z-index: 1000 !important;
+}

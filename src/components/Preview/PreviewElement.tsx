@@ -177,6 +177,7 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
                 className="w-full h-full relative"
             >
                 {item.type === 'img' && <img
+                    loading='lazy'
                     src={item.src}
                     alt=""
                     style={{

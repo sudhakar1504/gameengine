@@ -230,6 +230,7 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
                         className="w-full h-full relative"
                     >
                         {item.type === 'img' && <img
+                            loading="lazy"
                             src={item.src}
                             alt=""
                             style={{
