@@ -1,21 +1,6 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react';
 
-const PREVIEW_KEYFRAMES = `
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes focus { from { filter: blur(10px); opacity: 0; } to { filter: blur(0); opacity: 1; } }
-@keyframes zoom { from { transform: scale(0); } to { transform: scale(1); } }
-@keyframes turnOn { from { transform: rotate(-90deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
-@keyframes slide-left { from { transform: translateX(-100%); } to { transform: translateX(0); } }
-@keyframes slide-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
-@keyframes slide-top { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-@keyframes slide-bottom { from { transform: translateY(100%); } to { transform: translateY(0); } }
-@keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-30px); } 60% { transform: translateY(-15px); } }
-@keyframes swirl { from { transform: rotate(-540deg) scale(0); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
-@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes rollIn { from { transform: translateX(-100%) rotate(-120deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
-`;
-
 interface PreviewElementProps {
     item: any;
     onPageChange: (pageId: number) => void;
@@ -187,7 +172,6 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
             onMouseLeave={() => setIsHovered(false)}
             onClick={handleClick}
         >
-            <style>{PREVIEW_KEYFRAMES}</style>
             <div
                 ref={contentRef}
                 className="w-full h-full relative"

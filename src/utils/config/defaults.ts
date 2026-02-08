@@ -58,6 +58,7 @@ export const defaultAnimationConfig = {
 export const animationEffects = [
     { label: "None", value: "none" },
     { label: "Fade In", value: "fadeIn" },
+    { label: "Fade In Out", value: "fadeInOut" },
     { label: "Focus", value: "focus" },
     { label: "Zoom", value: "zoom" },
     { label: "Turn On", value: "turnOn" },
@@ -66,6 +67,12 @@ export const animationEffects = [
     { label: "Swirl", value: "swirl" },
     { label: "Rotate", value: "rotate" },
     { label: "Roll In", value: "rollIn" },
+    { label: "Pulse", value: "pulse" },
+    { label: "Heartbeat", value: "heartbeat" },
+    { label: "Flicker", value: "flicker" },
+    { label: "Random", value: "random" },
+    { label: "Notification", value: "notification" },
+    { label: "Float", value: "float" },
 ];
 
 export const animationDirections = [
