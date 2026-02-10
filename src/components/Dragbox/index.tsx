@@ -4,9 +4,12 @@ import Moveable from "react-moveable";
 import { Popover } from "antd";
 import InteractionModal from "../InteractionModal";
 import AnimationDrawer from "../AnimationDrawer";
+import useStoreconfig from "@/store";
 
 
-export default function DraggableBox({ item, setData, Data, index, SelectedID, setSelectedID, Allpages }: any) {
+export default function DraggableBox({ item, index }: any) {
+    const { editor, updateEditor, setSelectedElementId } = useStoreconfig();
+    const Data = editor?.elementsList;
     const targetRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const [Open, setOpen] = useState(false);
@@ -94,34 +97,23 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
     }, [item.coords, Data]);
 
     const changeZIndex = (direction: "front" | "back") => {
-        setData((prevData: any) => {
-            const newData = [...prevData];
-            const currentZIndex = newData[index].zIndex || 1;
-            let newZIndex = currentZIndex;
-
-            if (direction === "front") {
-                const maxZIndex = Math.max(...newData.map((i: any) => i.zIndex || 1));
-                newZIndex = maxZIndex + 1;
-            } else {
-                const minZIndex = Math.min(...newData.map((i: any) => i.zIndex || 1));
-                newZIndex = minZIndex - 1;
-            }
-
-            newData[index] = {
-                ...newData[index],
-                zIndex: newZIndex
-            };
-            return newData;
-        });
+        let duplicate = [...Data];
+        let currentZIndex = duplicate[index].zIndex || 1;
+        if (direction === "front") {
+            const maxZIndex = Math.max(...duplicate.map((i: any) => i.zIndex || 1));
+            duplicate[index].zIndex = maxZIndex + 1;
+        } else {
+            const minZIndex = Math.min(...duplicate.map((i: any) => i.zIndex || 1));
+            duplicate[index].zIndex = minZIndex - 1;
+        }
+        updateEditor(duplicate);
         setOpen(false);
     }
 
     const deleteItem = () => {
-        setData((prevData: any) => {
-            const newData = [...prevData];
-            newData.splice(index, 1);
-            return newData;
-        });
+        let duplicate = [...Data];
+        duplicate.splice(index, 1);
+        updateEditor(duplicate);
         setOpen(false);
     }
 
@@ -131,15 +123,13 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
     }
 
     const saveInteraction = (interactionData: any) => {
-        console.log("interactionData", interactionData);
-        setData((prevData: any) => {
-            const newData = [...prevData];
-            newData[index] = {
-                ...newData[index],
-                interaction: interactionData
-            };
-            return newData;
-        });
+        let duplicate = [...Data];
+        duplicate[index] = {
+            ...duplicate[index],
+            interaction: interactionData
+        };
+        updateEditor(duplicate);
+        setInteractionModalOpen(false);
     }
 
     const handleAnimation = () => {
@@ -148,14 +138,13 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
     }
 
     const saveAnimation = (animationData: any) => {
-        setData((prevData: any) => {
-            const newData = [...prevData];
-            newData[index] = {
-                ...newData[index],
-                animations: animationData
-            };
-            return newData;
-        });
+        let duplicate = [...Data];
+        duplicate[index] = {
+            ...duplicate[index],
+            animations: animationData
+        };
+        updateEditor(duplicate);
+        setAnimationDrawerOpen(false);
     }
 
     const content = (
@@ -186,24 +175,22 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
         const parentWidth = parent.clientWidth;
         const parentHeight = parent.clientHeight;
 
-        setData((prevData: any) => {
-            const newData = [...prevData];
-            newData[index] = {
-                ...newData[index],
-                coords: {
-                    ...newData[index].coords,
-                    x: (finalFrame.translate[0] / parentWidth) * 100,
-                    y: (finalFrame.translate[1] / parentHeight) * 100,
-                    width: (finalFrame.width / parentWidth) * 100,
-                    height: (finalFrame.height / parentHeight) * 100,
-                    angle: finalFrame.rotate
-                }
-            };
-            return newData;
-        });
+        let duplicate = [...Data];
+        duplicate[index] = {
+            ...duplicate[index],
+            coords: {
+                ...duplicate[index].coords,
+                x: (finalFrame.translate[0] / parentWidth) * 100,
+                y: (finalFrame.translate[1] / parentHeight) * 100,
+                width: (finalFrame.width / parentWidth) * 100,
+                height: (finalFrame.height / parentHeight) * 100,
+                angle: finalFrame.rotate
+            }
+        };
+        updateEditor(duplicate);
     }
 
-    const isSelected = SelectedID === item.id;
+    const isSelected = editor?.selectedElementId === item.id;
 
     return (
         <>
@@ -216,7 +203,7 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
             >
                 <div
                     ref={targetRef}
-                    onClick={() => setSelectedID(item.id)}
+                    onClick={() => setSelectedElementId(item.id)}
                     style={{
                         position: "absolute",
                         zIndex: item?.zIndex || 1,
@@ -309,7 +296,6 @@ export default function DraggableBox({ item, setData, Data, index, SelectedID, s
                 onCancel={() => setInteractionModalOpen(false)}
                 onSave={saveInteraction}
                 initialData={item.interaction}
-                pages={Allpages}
             />
 
             <AnimationDrawer

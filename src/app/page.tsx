@@ -5,9 +5,11 @@ import Topbar from "@/components/Topbar";
 import Sidebar from "@/components/sidebar";
 import { useRouter } from "next/navigation";
 import Preview from "@/components/Preview";
+import useStoreconfig from "@/store";
 
 export default function Home() {
   const router = useRouter();
+  const { editor, allpages, updateAllPages } = useStoreconfig()
   // pages
   const [Allpages, setAllpages] = useState([
     {
@@ -29,28 +31,19 @@ export default function Home() {
     },
   ]);
   const [SelectedPage, setSelectedPage] = useState(1);
-
-
-  const [SelectedID, setSelectedID] = useState(null);
-  const [Data, setData] = useState<any>([]);
   const [isPreview, setIsPreview] = useState(false);
 
-  useEffect(() => {
-    setData(() => (Allpages[0]?.data));
-  }, []);
 
   const saveCurrentData = () => {
-    setAllpages((prevData: any) => {
-      const newData = [...prevData];
-      const index = newData.findIndex((item: any) => item.id === SelectedPage);
-      if (index !== -1) {
-        newData[index] = {
-          ...newData[index],
-          data: Data
+    updateAllPages(allpages?.pages?.map((i: any) => {
+      if (i.id === allpages?.selectedPage) {
+        return {
+          ...i,
+          data: editor?.elementsList
         };
       }
-      return newData;
-    });
+      return i;
+    }));
   };
 
   const enterPreview = () => {
@@ -72,22 +65,25 @@ export default function Home() {
     <div className="w-[100vw] h-[100dvh]">
       {/* topbar */}
       <div className="w-full h-[50px]">
-        <Topbar selectedItem={SelectedID} Data={Data} setData={setData} />
+        <Topbar />
       </div>
       <div className="w-full h-[calc(100dvh-50px)]  flex">
         {/* leftsidebar */}
-        <div className="w-[100px] h-full">
-          <Sidebar Allpages={Allpages} SelectedPage={SelectedPage} setSelectedPage={setSelectedPage} Data={Data} setData={setData} setAllpages={setAllpages} />
+        <div className="w-[100px] h-full border-r border-gray-300">
+          <Sidebar />
         </div>
         {/* canvas */}
-        <div className="w-[calc(100%-100px)] h-full  flex flex-col items-center justify-center bg-gray-200">
-          <div className="max-w-[1000px] max-h-[600px] w-full h-full border-2 border-black bg-white overflow-hidden shadow-2xl">
-            <Slideview Data={Data} setData={setData} SelectedID={SelectedID} setSelectedID={setSelectedID} Allpages={Allpages} />
+        {allpages?.selectedPage === 0 ? <div className="w-[calc(100%-100px)] h-full  flex flex-col items-center justify-center bg-gray-200">
+          <p className="text-gray-400 text-xs italic">Select a page to edit</p>
+        </div> : <div className="w-[calc(100%-100px)] h-full  flex flex-col items-center justify-center bg-gray-200">
+          <p className="text-gray-400 text-xs italic">Page {allpages?.pages?.findIndex((i: any) => i?.id === allpages?.selectedPage) + 1}</p>
+          <div className="max-w-[1000px] max-h-[600px] w-full h-full border-2 border-gray-300 bg-white overflow-hidden shadow-xl">
+            <Slideview />
           </div>
           <button
             className="mt-4 px-8 py-2 bg-blue-600 text-white rounded-full font-bold shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2"
             onClick={() => {
-              console.log("save", Allpages);
+              console.log("save", editor);
             }}
           >
             <i className="fa-solid fa-play"></i>
@@ -100,7 +96,7 @@ export default function Home() {
             <i className="fa-solid fa-play"></i>
             Preview
           </button>
-        </div>
+        </div>}
       </div>
     </div>
   );

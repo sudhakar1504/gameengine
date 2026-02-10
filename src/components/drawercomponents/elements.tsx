@@ -5,8 +5,10 @@ import { audioList } from '@/utils/config/audioList';
 import { imageList } from '@/utils/config/imageList';
 import ImageGallery from '../ImageGallery';
 import { bgList } from '@/utils/config/bgList';
+import useStoreconfig from '@/store';
 
-const Elements = ({ setData, setElementsOpen }: any) => {
+const Elements = ({ setElementsOpen }: any) => {
+    const { editor, updateEditor } = useStoreconfig();
     const [imageGalleryOpen, setImageGalleryOpen] = useState(false);
     const elementData: any = {
         text: {
@@ -65,16 +67,16 @@ const Elements = ({ setData, setElementsOpen }: any) => {
     const [selectedAudioItem, setSelectedAudioItem] = useState<any>(null);
 
     const handleSelectFromGallery = (src: string) => {
-        setData((prevData: any) => {
-            const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1), 0);
-            const newZIndex = maxZIndex + 1;
-            return [...prevData, {
-                ...elementData['image'],
-                id: Date.now().toString(),
-                src: src,
-                zIndex: newZIndex
-            }]
-        });
+        let duplicate = [...editor?.elementsList]
+        const maxZIndex = Math.max(...duplicate.map((i: any) => i.zIndex || 1), 0);
+        const newZIndex = maxZIndex + 1;
+        duplicate.push({
+            ...elementData['image'],
+            id: Date.now().toString(),
+            src: src,
+            zIndex: newZIndex
+        })
+        updateEditor(duplicate);
         setImageGalleryOpen(false);
         setElementsOpen(null);
     }
@@ -82,20 +84,65 @@ const Elements = ({ setData, setElementsOpen }: any) => {
     const handleAddAudio = (loop: boolean) => {
         if (!selectedAudioItem) return;
 
-        setData((prevData: any) => {
-            return [...prevData, {
-                ...elementData['audio'],
-                id: Date.now().toString(),
-                src: selectedAudioItem.src,
-                audio: {
-                    ...defaultAudioConfig,
-                    loop: loop
-                }
-            }]
-        });
+        let duplicate = [...editor?.elementsList]
+        duplicate.push({
+            ...elementData['audio'],
+            id: Date.now().toString(),
+            src: selectedAudioItem.src,
+            audio: {
+                ...defaultAudioConfig,
+                loop: loop
+            }
+        })
+        updateEditor(duplicate);
         setAudioModalOpen(false);
         setElementsOpen(null);
     }
+
+    const textHandler = () => {
+        let duplicate = [...editor?.elementsList]
+        const maxZIndex = Math.max(...duplicate.map((i: any) => i.zIndex || 1), 0);
+        const newZIndex = maxZIndex + 1;
+        duplicate.push({
+            ...elementData['text'],
+            id: Date.now().toString(),
+            zIndex: newZIndex
+        })
+        updateEditor(duplicate);
+        setElementsOpen(null);
+    }
+    const imageHandler = (src: string) => {
+        let duplicate = [...editor?.elementsList]
+        const maxZIndex = Math.max(...duplicate.map((i: any) => i.zIndex || 1), 0);
+        const newZIndex = maxZIndex + 1;
+        duplicate.push({
+            ...elementData['image'],
+            id: Date.now().toString(),
+            src: src,
+            zIndex: newZIndex
+        })
+        updateEditor(duplicate);
+        setElementsOpen(null);
+    }
+
+
+    const bgHandler = (src: string) => {
+        let duplicate = [...editor?.elementsList]
+        let findBg = duplicate?.filter((item: any) => item?.type == 'bg');
+        if (findBg.length > 0) {
+            duplicate = duplicate?.map((item: any) => item?.type == 'bg' ? { ...item, src: src } : item);
+        } else {
+            duplicate.push({
+                type: 'bg',
+                src: src,
+                id: Date.now().toString(),
+                zIndex: 0
+            })
+        }
+        updateEditor(duplicate);
+        setElementsOpen(null);
+    }
+
 
     const textData = [
         {
@@ -106,37 +153,13 @@ const Elements = ({ setData, setElementsOpen }: any) => {
         }
     ];
 
-
-
-    const bgDatas = [
-        {
-            id: 1,
-            text: 'Image',
-            type: 'image',
-            src: "https://img.genially.com/59e059d30b9c21060cb4c2ec/05a18a44-7a91-4506-9eb9-8af50a620a24.jpeg",
-            icon: <i className="fa-solid fa-image"></i>
-        }
-    ];
-
     const items = [
         {
             key: '1',
             label: 'Text',
             children: <div>
                 {textData.map((element: any) => (
-                    <button onClick={() => {
-                        setData((prevData: any) => {
-                            const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1));
-                            const newZIndex = maxZIndex + 1;
-                            return [...prevData, {
-                                ...elementData['text'],
-                                id: Date.now().toString(),
-                                zIndex: newZIndex
-                            }]
-                        })
-                        setElementsOpen(null)
-
-                    }} key={element.id} className='w-[80px] h-[50px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
+                    <button onClick={textHandler} key={element.id} className='w-[80px] h-[50px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
                         {element.icon}
                         {element.text}
                     </button>
@@ -160,20 +183,7 @@ const Elements = ({ setData, setElementsOpen }: any) => {
                 </div>
                 <div className='flex flex-wrap gap-2'>
                     {imageList.map((element: any) => (
-                        <button onClick={() => {
-                            setData((prevData: any) => {
-                                const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1));
-                                const newZIndex = maxZIndex + 1;
-                                return [...prevData, {
-                                    ...elementData['image'],
-                                    id: Date.now().toString(),
-                                    src: element.src,
-                                    zIndex: newZIndex
-                                }]
-                            })
-                            setElementsOpen(null)
-
-                        }} key={element.id} className='w-[80px] h-[80px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
+                        <button onClick={() => imageHandler(element.src)} key={element.id} className='w-[80px] h-[80px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
                             <img loading='lazy' src={element.src} className='w-full h-full object-contain' alt="" />
                         </button>
                     ))}
@@ -186,32 +196,7 @@ const Elements = ({ setData, setElementsOpen }: any) => {
             children: <div className='flex flex-wrap gap-2'>
                 {bgList.map((element: any) => (
                     <button onClick={() => {
-
-                        setData((prevData: any) => {
-                            let bg = prevData.filter((item: any) => item.type === 'bg');
-                            const maxZIndex = Math.max(...prevData.map((i: any) => i.zIndex || 1));
-                            const newZIndex = maxZIndex + 1;
-                            if (bg.length > 0) {
-                                return prevData.map((item: any) => {
-                                    if (item.type === 'bg') {
-                                        return {
-                                            ...item,
-                                            src: element.Image,
-                                            zIndex: newZIndex
-                                        }
-                                    }
-                                    return item
-                                })
-                            } else {
-                                return [...prevData, {
-                                    id: Date.now().toString(),
-                                    type: "bg",
-                                    src: element.Image,
-                                    zIndex: newZIndex
-                                }]
-                            }
-                        })
-                        setElementsOpen(null)
+                        bgHandler(element.Image);
 
                     }} key={element.id} className='w-[80px] h-[80px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
                         <img loading='lazy' src={element.Image} className='w-full h-full object-contain' alt="" />

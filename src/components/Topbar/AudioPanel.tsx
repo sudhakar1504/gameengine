@@ -1,32 +1,33 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ControlGroup, SliderControl, ToggleControl } from '../ui/controls';
+import useStoreconfig from '@/store';
 
 interface AudioPanelProps {
     item: any;
-    setData: (data: any) => void;
-    id: string;
 }
 
-const AudioPanel = ({ item, setData, id }: AudioPanelProps) => {
+const AudioPanel = ({ item }: AudioPanelProps) => {
+    const { updateEditor, editor } = useStoreconfig()
 
     const updateAudio = (key: string, value: any) => {
-        setData((prevData: any) => {
-            return prevData.map((d: any) => {
-                if (d.id === id) {
-                    return {
-                        ...d,
-                        audio: {
-                            ...(d.audio || {}),
-                            [key]: value
-                        }
-                    };
-                }
-                return d;
-            });
-        });
+        updateEditor(editor?.elementsList?.map((i: any) => {
+            if (i.id === editor?.selectedElementId) {
+                return {
+                    ...i,
+                    audio: {
+                        ...(i.audio || {}),
+                        [key]: value
+                    }
+                };
+            }
+            return i;
+        })
+        )
     };
 
-    const config = item.audio || { loop: false, autoplay: false, volume: 100 };
+    const config = useMemo(() => {
+        return item.audio || { loop: false, autoplay: false, volume: 100 };
+    }, [item.audio]);
 
     return (
         <div className="flex flex-wrap gap-6 items-center">

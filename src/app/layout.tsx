@@ -7,6 +7,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
+import StoreProvider from "./StoreProvider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -35,11 +36,13 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      ><DndProvider backend={isTouchDevice ? TouchBackend : HTML5Backend}>
-          <AntdRegistry>
-            {children}
-          </AntdRegistry>
-        </DndProvider>
+      ><StoreProvider>
+          <DndProvider backend={isTouchDevice ? TouchBackend : HTML5Backend}>
+            <AntdRegistry>
+              {children}
+            </AntdRegistry>
+          </DndProvider>
+        </StoreProvider>
       </body>
     </html>
   );

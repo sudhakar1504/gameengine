@@ -1,41 +1,39 @@
 import React from 'react';
 import { ColorControl, ControlGroup, InputControl, SelectControl, SliderControl, Label } from '../ui/controls';
 import { fontFamilies } from '@/utils/config/defaults';
+import useStoreconfig from '@/store';
 
 interface TextPanelProps {
     item: any;
-    setData: (data: any) => void;
-    id: string; // selected item id
 }
 
-const TextPanel = ({ item, setData, id }: TextPanelProps) => {
+const TextPanel = ({ item }: TextPanelProps) => {
+    const { editor, updateEditor } = useStoreconfig()
 
     const updateFont = (key: string, value: any) => {
-        setData((prevData: any) => {
-            return prevData.map((d: any) => {
-                if (d.id === id) {
-                    return {
-                        ...d,
-                        font: {
-                            ...d.font,
-                            [key]: value
-                        }
-                    };
-                }
-                return d;
-            });
-        });
+        updateEditor(editor?.elementsList?.map((i: any) => {
+            if (i.id === editor?.selectedElementId) {
+                return {
+                    ...i,
+                    font: {
+                        ...i.font,
+                        [key]: value
+                    }
+                };
+            }
+            return i;
+        })
+        )
     };
 
     const updateText = (val: string) => {
-        setData((prevData: any) => {
-            return prevData.map((d: any) => {
-                if (d.id === id) {
-                    return { ...d, text: val };
-                }
-                return d;
-            });
-        });
+        updateEditor(editor?.elementsList?.map((i: any) => {
+            if (i.id === editor?.selectedElementId) {
+                return { ...i, text: val };
+            }
+            return i;
+        })
+        )
     }
 
     if (!item) return null;

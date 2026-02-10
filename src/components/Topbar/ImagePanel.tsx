@@ -1,51 +1,53 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ControlGroup, SliderControl, ToggleControl } from '../ui/controls';
+import useStoreconfig from '@/store';
 
 interface ImagePanelProps {
     item: any;
-    setData: (data: any) => void;
-    id: string;
 }
 
-const ImagePanel = ({ item, setData, id }: ImagePanelProps) => {
+const ImagePanel = ({ item }: ImagePanelProps) => {
+    const { updateEditor, editor } = useStoreconfig()
 
     const updateFilter = (key: string, value: any) => {
-        setData((prevData: any) => {
-            return prevData.map((d: any) => {
-                if (d.id === id) {
-                    return {
-                        ...d,
-                        filter: {
-                            ...(d.filter || {}),
-                            [key]: value
-                        }
-                    };
-                }
-                return d;
-            });
-        });
+        updateEditor(editor?.elementsList?.map((i: any) => {
+            if (i.id === editor?.selectedElementId) {
+                return {
+                    ...i,
+                    filter: {
+                        ...(i.filter || {}),
+                        [key]: value
+                    }
+                };
+            }
+            return i;
+        })
+        )
     };
 
     const updateTransform = (key: string, value: any) => {
-        setData((prevData: any) => {
-            return prevData.map((d: any) => {
-                if (d.id === id) {
-                    return {
-                        ...d,
-                        transform: {
-                            ...(d.transform || {}),
-                            [key]: value
-                        }
-                    };
-                }
-                return d;
-            });
-        });
+        updateEditor(editor?.elementsList?.map((i: any) => {
+            if (i.id === editor?.selectedElementId) {
+                return {
+                    ...i,
+                    transform: {
+                        ...(i.transform || {}),
+                        [key]: value
+                    }
+                };
+            }
+            return i;
+        })
+        )
     };
 
     // Ensure defaults exist if new
-    const filters = item.filter || { opacity: 100, brightness: 100, contrast: 100, saturate: 100, blur: 0 };
-    const transforms = item.transform || { flipX: false, flipY: false };
+    const filters = useMemo(() => {
+        return item.filter || { opacity: 100, brightness: 100, contrast: 100, saturate: 100, blur: 0 };
+    }, [item.filter]);
+    const transforms = useMemo(() => {
+        return item.transform || { flipX: false, flipY: false };
+    }, [item.transform]);
 
     return (
         <div className="flex flex-wrap gap-6 items-center">

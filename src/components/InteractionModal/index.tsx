@@ -3,16 +3,17 @@ import { Modal, Tabs, Input, Checkbox, Select } from 'antd';
 import { ControlGroup } from '../ui/controls';
 import { defaultInteractionConfig } from '@/utils/config/defaults';
 import { audioList } from '@/utils/config/audioList';
+import useStoreconfig from '@/store';
 
 interface InteractionModalProps {
     open: boolean;
     onCancel: () => void;
     onSave: (interactionData: any) => void;
     initialData?: any;
-    pages?: any[]; // List of pages for navigation
 }
 
-const InteractionModal = ({ open, onCancel, onSave, initialData, pages = [] }: InteractionModalProps) => {
+const InteractionModal = ({ open, onCancel, onSave, initialData }: InteractionModalProps) => {
+    const { allpages } = useStoreconfig();
     const [data, setData] = useState(initialData || defaultInteractionConfig);
     const [activeTab, setActiveTab] = useState('none');
 
@@ -81,7 +82,7 @@ const InteractionModal = ({ open, onCancel, onSave, initialData, pages = [] }: I
                             onChange={(val) => updateData('targetPageId', val)}
                             options={[
                                 { label: 'None', value: '' },
-                                ...pages.map((p: any) => ({ label: p.title || `Page ${p.id}`, value: p.id }))
+                                ...allpages?.pages?.map((p: any) => ({ label: p.title || `Page ${p.id}`, value: p.id }))
                             ]}
                             placeholder="Select a destination page"
                         />

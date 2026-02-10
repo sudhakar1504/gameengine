@@ -1,7 +1,9 @@
-import React, { useState, useLayoutEffect, useRef } from 'react'
+import React, { useState, useLayoutEffect, useRef, useMemo } from 'react'
 import DraggableBox from '../Dragbox/index'
+import useStoreconfig from '@/store';
 
-const Slideview = ({ Data, setData, SelectedID, setSelectedID, Allpages }: { Data: any, setData: any, SelectedID: any, setSelectedID: any, Allpages: any }) => {
+const Slideview = () => {
+    const { editor } = useStoreconfig();
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -19,13 +21,15 @@ const Slideview = ({ Data, setData, SelectedID, setSelectedID, Allpages }: { Dat
         return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
-    let bgIndex = Data.findIndex((item: any) => item.type === "bg");
+    const bgIndex = useMemo(() => {
+        return editor?.elementsList?.findIndex((item: any) => item.type === "bg")
+    }, [editor?.elementsList])
     return (
         <div
             ref={containerRef}
             className={`relative h-full w-full user-select-none`}
-            style={Data[bgIndex]?.type === "bg" ? {
-                backgroundImage: `url( ${Data[bgIndex]?.src || ""})`,
+            style={editor?.elementsList[bgIndex]?.type === "bg" ? {
+                backgroundImage: `url( ${editor?.elementsList[bgIndex]?.src || ""})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             } : {}}
@@ -33,7 +37,7 @@ const Slideview = ({ Data, setData, SelectedID, setSelectedID, Allpages }: { Dat
             <div className="absolute top-0 left-0 p-1 text-[10px] text-gray-400 z-50 pointer-events-none">
                 Width: {dimensions.width}px
             </div>
-            {Data && Data?.map((item: any, index: number) => {
+            {editor?.elementsList && editor?.elementsList?.map((item: any, index: number) => {
                 if (item.type === "bg") {
                     return (<></>
                         // <div key={item.id} className='absolute top-0 left-0 w-full h-full'>
@@ -42,7 +46,7 @@ const Slideview = ({ Data, setData, SelectedID, setSelectedID, Allpages }: { Dat
                     )
                 }
                 return (
-                    <DraggableBox key={item.id} Data={Data} setData={setData} item={item} index={index} SelectedID={SelectedID} setSelectedID={setSelectedID} Allpages={Allpages} />
+                    <DraggableBox key={item.id} item={item} index={index} />
                 )
             })}
         </div>
