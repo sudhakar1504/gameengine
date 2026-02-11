@@ -15,7 +15,7 @@ const Sidebar = () => {
                 <p className='text-3xl'><i className="fa-solid fa-display"></i></p>
                 <p className='text-xs font-semibold'>Pages</p>
             </button>
-            <button className={`w-full cursor-pointer border-b-2 border-gray-200 py-2 ${allpages?.selectedPage === 0 ? "opacity-50 cursor-not-allowed" : ""}`} onClick={() => setElementsOpen("Elements")}>
+            <button className={`w-full border-b-2 border-gray-200 py-2 ${allpages?.selectedPage === 0 ? "opacity-50 cursor-not-allowed" : " cursor-pointer"}`} onClick={() => setElementsOpen("Elements")} disabled={allpages?.selectedPage === 0}>
                 <p className='text-3xl'><i className="fa-solid fa-pentagon"></i></p>
                 <p className='text-xs font-semibold'>Elements</p>
             </button>

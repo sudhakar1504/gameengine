@@ -15,6 +15,8 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
     const [isHovered, setIsHovered] = useState(false);
     const [audio] = useState(() => (item.type === 'audio' || item.interaction?.audioSrc !== '') ? new Audio() : null);
 
+    const [activeEffect, setActiveEffect] = useState<string | null>(null);
+
     // Initial styles from coords
     const style: React.CSSProperties = {
         position: 'absolute',
@@ -104,7 +106,15 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
 
         // 2. Handle Interaction
         const inter = item.interaction;
-        // if (!inter || inter.type === 'none') return;
+
+        // Handle Effect Interaction
+        if (inter?.type === 'effect' && inter?.effectValue) {
+            setActiveEffect(inter.effectValue);
+            setTimeout(() => {
+                setActiveEffect(null);
+            }, 3000); // 3 seconds duration
+            return;
+        }
 
         const checkOtherInteraction = () => {
             if (inter?.targetPageId) {
@@ -115,8 +125,6 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
                 window.open(inter.url, inter?.target ? '_blank' : '_self');
                 return;
             }
-
-
         }
 
         if (inter?.audioSrc && inter?.audioSrc !== "" && audio) {
@@ -130,15 +138,6 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
         } else {
             checkOtherInteraction();
         }
-
-        // if (inter.type === 'page' && inter.value) {
-        //     onPageChange(Number(inter.value));
-        // } else if (inter.type === 'link' && inter.value) {
-        //     window.open(inter.value.startsWith('http') ? inter.value : `https://${inter.value}`, '_blank');
-        // } else if (inter.type === 'audio' && inter.audioSrc && audio) {
-        //     audio.src = inter.audioSrc;
-        //     audio.play().catch(e => console.error("Audio playback failed", e));
-        // }
     };
 
     // Handle Auto-play Audio if the element is an audio element
@@ -165,40 +164,79 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
     }, []);
 
     return (
-        <div
-            ref={containerRef}
-            style={style}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onClick={handleClick}
-        >
+        <>
+            {activeEffect && <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 999999999,
+                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'transparent'
+            }}>
+                <EffectLayer type={activeEffect || ''} />
+            </div>}
             <div
-                ref={contentRef}
-                className="w-full h-full relative"
+                ref={containerRef}
+                style={style}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                onClick={handleClick}
             >
-                {item.type === 'img' && <img
-                    loading='lazy'
-                    src={item.src}
-                    alt=""
-                    style={{
+                <div
+                    ref={contentRef}
+                    className="w-full h-full relative"
+                >
+
+                    {item.type === 'group' && item.children && (
+                        <div className="w-full h-full relative pointer-events-none">
+                            {item.children.map((child: any, i: number) => (
+                                <div key={i} style={{
+                                    position: 'absolute',
+                                    left: `${child.coords.x}%`,
+                                    top: `${child.coords.y}%`,
+                                    width: `${child.coords.width}%`,
+                                    height: `${child.coords.height}%`,
+                                    transform: `rotate(${child.coords.angle || 0}deg)`
+                                }}>
+                                    {child.type === 'img' && <img src={child.src} className="w-full h-full object-contain" alt="" />}
+                                    {child.type === 'text' && <div style={{ ...child.font, fontSize: `${(child.font?.fontSize / 100) * (parentElement || 1000)}vw` }}>{child.text}</div>}
+                                    {/* Note: Font size in groups might need scaling logic or be simpler */}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {item.type === 'img' && <img
+                        loading='lazy'
+                        src={item.src}
+                        alt=""
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                            filter: `opacity(${item.filter?.opacity ?? 100}%) brightness(${item.filter?.brightness ?? 100}%) contrast(${item.filter?.contrast ?? 100}%) saturate(${item.filter?.saturate ?? 100}%) blur(${item.filter?.blur ?? 0}px)`,
+                            transform: `scaleX(${item.transform?.flipX ? -1 : 1}) scaleY(${item.transform?.flipY ? -1 : 1})`
+                        }}
+                    />}
+                    {item.type === 'text' && parentElement && <div style={{
+                        ...item.font,
+                        fontSize: `${(item.font?.fontSize / 100) * (parentElement || 1000)}vw`,
                         width: '100%',
                         height: '100%',
-                        objectFit: 'contain',
-                        filter: `opacity(${item.filter?.opacity ?? 100}%) brightness(${item.filter?.brightness ?? 100}%) contrast(${item.filter?.contrast ?? 100}%) saturate(${item.filter?.saturate ?? 100}%) blur(${item.filter?.blur ?? 0}px)`,
-                        transform: `scaleX(${item.transform?.flipX ? -1 : 1}) scaleY(${item.transform?.flipY ? -1 : 1})`
-                    }}
-                />}
-                {item.type === 'text' && parentElement && <div style={{
-                    ...item.font,
-                    fontSize: `${(item.font?.fontSize / 100) * (parentElement || 1000)}vw`,
-                    width: '100%',
-                    height: '100%',
-                }}>{item.text}</div>}
+                    }}>{item.text}</div>}
 
-                {/* Audio icon removed in preview, it's just a functional element */}
+                    {/* Audio icon removed in preview, it's just a functional element */}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
+
+import EffectLayer from '../Effects/EffectLayer';
 
 export default PreviewElement;

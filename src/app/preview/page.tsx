@@ -1,8 +1,11 @@
 import React from 'react'
+import Preview from '@/components/Preview'
 
-const Preview = () => {
+const PreviewPage = () => {
     return (
-        <div>Preview</div>
+        <div className='w-full h-full'>
+            <Preview />
+        </div>
     )
 }
 

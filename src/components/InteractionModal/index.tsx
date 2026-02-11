@@ -3,6 +3,7 @@ import { Modal, Tabs, Input, Checkbox, Select } from 'antd';
 import { ControlGroup } from '../ui/controls';
 import { defaultInteractionConfig } from '@/utils/config/defaults';
 import { audioList } from '@/utils/config/audioList';
+import { effectsList } from '@/utils/config/effectsList';
 import useStoreconfig from '@/store';
 
 interface InteractionModalProps {
@@ -113,6 +114,31 @@ const InteractionModal = ({ open, onCancel, onSave, initialData }: InteractionMo
                             ]}
                         />
                     </ControlGroup>
+                </div>
+            )
+        },
+        {
+            key: 'effect',
+            label: 'Effects',
+            children: (
+                <div className="flex flex-col gap-4 pt-2">
+                    <ControlGroup label="Select Effect">
+                        <Select
+                            className="w-full h-8"
+                            value={data.effectValue} // Store the effect key/value
+                            onChange={(val) => {
+                                updateData('effectValue', val);
+                            }}
+                            options={effectsList.map((e: any) => ({ label: <span>{e.icon} {e.name}</span>, value: e.value }))}
+                            placeholder="Select an effect"
+                        />
+                    </ControlGroup>
+
+                    {!data.effectValue && (
+                        <div className="mt-2 text-gray-400 text-sm">
+                            Select an effect to see it in action in Preview mode.
+                        </div>
+                    )}
                 </div>
             )
         }

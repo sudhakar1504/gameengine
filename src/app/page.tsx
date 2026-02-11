@@ -48,18 +48,10 @@ export default function Home() {
 
   const enterPreview = () => {
     saveCurrentData();
-    setIsPreview(true);
+    router.push("/preview");
   };
 
-  if (isPreview) {
-    return (
-      <Preview
-        Allpages={Allpages}
-        onExit={() => setIsPreview(false)}
-        initialPageId={SelectedPage}
-      />
-    );
-  }
+
 
   return (
     <div className="w-[100vw] h-[100dvh]">

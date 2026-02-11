@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser, setUser, updateUser } from './features/user/userSlice';
 import { updateAllPages, setSelectedPage } from './features/allpages/allpages';
-import { updateEditor, setSelectedElementId } from './features/editor/editor';
+import { updateEditor, setSelectedElementId, setSelectedElementIds, addToSelection, removeFromSelection, clearSelection } from './features/editor/editor';
 const useStoreconfig = () => {
     const user = useSelector((state: any) => state.user);
     const allpages = useSelector((state: any) => state.allpages);
@@ -19,6 +19,10 @@ const useStoreconfig = () => {
         editor,
         updateEditor: (data: any) => dispatch(updateEditor(data)),
         setSelectedElementId: (data: number) => dispatch(setSelectedElementId(data)),
+        setSelectedElementIds: (data: number[]) => dispatch(setSelectedElementIds(data)),
+        addToSelection: (data: number) => dispatch(addToSelection(data)),
+        removeFromSelection: (data: number) => dispatch(removeFromSelection(data)),
+        clearSelection: () => dispatch(clearSelection()),
     }
 }
 

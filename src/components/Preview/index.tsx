@@ -1,15 +1,14 @@
 "use client"
-import React, { useRef, useState, useLayoutEffect } from 'react';
+import React, { useRef, useState, useLayoutEffect, useMemo } from 'react';
 import PreviewElement from './PreviewElement';
+import useStoreconfig from '@/store';
+import { useRouter } from 'next/navigation';
 
-interface PreviewProps {
-    Allpages: any[];
-    onExit: () => void;
-    initialPageId: number;
-}
 
-const Preview = ({ Allpages, onExit, initialPageId }: PreviewProps) => {
-    const [currentPageId, setCurrentPageId] = useState(initialPageId);
+const Preview = () => {
+    const { allpages } = useStoreconfig();
+    const router = useRouter();
+    const [currentPageId, setCurrentPageId] = useState(allpages?.selectedPage);
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -30,7 +29,11 @@ const Preview = ({ Allpages, onExit, initialPageId }: PreviewProps) => {
         window.addEventListener('resize', updateDimensions);
         return () => window.removeEventListener('resize', updateDimensions);
     }, []);
-    const currentPage = Allpages.find(p => p.id === currentPageId) || Allpages[0];
+
+    const currentPage = useMemo(() => {
+        return allpages?.pages?.find((p: any) => p.id === allpages?.selectedPage) || allpages?.pages?.[0];
+    }, [allpages?.pages, allpages?.selectedPage]);
+
     const data = currentPage?.data || [];
 
     // Find background if any
@@ -48,7 +51,7 @@ const Preview = ({ Allpages, onExit, initialPageId }: PreviewProps) => {
         <div className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center">
             {/* Close Button */}
             <button
-                onClick={onExit}
+                onClick={() => router.back()}
                 className="absolute top-4 right-4 z-[10000] px-4 py-2 bg-white/20 hover:bg-white/40 text-white rounded backdrop-blur-md transition-all border border-white/30"
             >
                 <i className="fa-solid fa-xmark mr-2"></i>

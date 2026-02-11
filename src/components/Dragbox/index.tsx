@@ -144,8 +144,63 @@ export default function DraggableBox({ item, index }: any) {
             animations: animationData
         };
         updateEditor(duplicate);
-        setAnimationDrawerOpen(false);
+        // setAnimationDrawerOpen(false);
     }
+
+    // Check if this element is part of the multi-selection
+    const isMultiSelected = editor?.selectedElementIds?.includes(item.id);
+    const isSelected = editor?.selectedElementId === item.id || isMultiSelected;
+
+    const ungroupItem = () => {
+        if (item.type !== 'group' || !item.children) return;
+
+        const parent = targetRef.current?.parentElement;
+        if (!parent) return;
+
+        const parentWidth = parent.clientWidth;
+        const parentHeight = parent.clientHeight;
+
+        // Group's current absolute position/size
+        // We use the frame.current because it tracks the latest drag state
+        // However frame.current is in pixels (translate x/y, width/height)
+
+        // Actually, frame.current is synced from props in useEffect. 
+        // If we haven't dragged, it's correct. If we have dragged, it's correct.
+
+        const groupX = frame.current.translate[0];
+        const groupY = frame.current.translate[1];
+        const groupW = frame.current.width;
+        const groupH = frame.current.height;
+
+        const newItems = item.children.map((child: any) => {
+            // child.coords are % relative to group
+
+            const childW_px = (child.coords.width / 100) * groupW;
+            const childH_px = (child.coords.height / 100) * groupH;
+            const childX_relative_px = (child.coords.x / 100) * groupW;
+            const childY_relative_px = (child.coords.y / 100) * groupH;
+
+            const childX_absolute = groupX + childX_relative_px;
+            const childY_absolute = groupY + childY_relative_px;
+
+            return {
+                ...child,
+                id: Date.now() + Math.random(), // Ensure unique ID
+                coords: {
+                    x: (childX_absolute / parentWidth) * 100,
+                    y: (childY_absolute / parentHeight) * 100,
+                    width: (childW_px / parentWidth) * 100,
+                    height: (childH_px / parentHeight) * 100,
+                    angle: (item.coords.angle || 0) + (child.coords.angle || 0) // Simple angle addition
+                }
+            };
+        });
+
+        let duplicate = [...Data];
+        duplicate.splice(index, 1, ...newItems);
+        updateEditor(duplicate);
+        setOpen(false);
+    };
 
     const content = (
         <div className="flex flex-col gap-2">
@@ -161,6 +216,11 @@ export default function DraggableBox({ item, index }: any) {
             <button className="hover:bg-gray-100 px-2 py-1 rounded text-left" onClick={handleAnimation}>
                 Animation
             </button>
+            {item.type === 'group' && (
+                <button onClick={ungroupItem} className="hover:bg-gray-100 px-2 py-1 rounded text-left">
+                    Ungroup
+                </button>
+            )}
             <button onClick={() => deleteItem()} className="hover:bg-gray-100 px-2 py-1 rounded text-left text-red-500">
                 Delete
             </button>
@@ -176,6 +236,12 @@ export default function DraggableBox({ item, index }: any) {
         const parentHeight = parent.clientHeight;
 
         let duplicate = [...Data];
+        // If we are just moving a single item that happens to be in a multi-selection, 
+        // we might want to move ALL selected items. 
+        // BUT for now, let's assume the user drags the specific item or the group.
+        // Implementing multi-drag is complex. 
+        // If this is a group, we just update the group.
+
         duplicate[index] = {
             ...duplicate[index],
             coords: {
@@ -190,8 +256,6 @@ export default function DraggableBox({ item, index }: any) {
         updateEditor(duplicate);
     }
 
-    const isSelected = editor?.selectedElementId === item.id;
-
     return (
         <>
             <Popover
@@ -203,12 +267,19 @@ export default function DraggableBox({ item, index }: any) {
             >
                 <div
                     ref={targetRef}
-                    onClick={() => setSelectedElementId(item.id)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        // If shift key is pressed, toggle selection (future improvement)
+                        // For now just set as selected
+                        if (!isMultiSelected) {
+                            setSelectedElementId(item.id);
+                        }
+                    }}
                     style={{
                         position: "absolute",
                         zIndex: item?.zIndex || 1,
                         cursor: "move",
-                        border: isSelected ? "1px solid #1890ff" : "1px solid transparent",
+                        border: isSelected ? "2px solid #1890ff" : "1px solid transparent", // thicker border for visibility
                         boxSizing: "border-box",
                     }}
                 >
@@ -216,6 +287,25 @@ export default function DraggableBox({ item, index }: any) {
                         ref={contentRef}
                         className="w-full h-full relative"
                     >
+                        {item.type === 'group' && item.children && (
+                            <div className="w-full h-full relative pointer-events-none">
+                                {item.children.map((child: any, i: number) => (
+                                    <div key={i} style={{
+                                        position: 'absolute',
+                                        left: `${child.coords.x}%`,
+                                        top: `${child.coords.y}%`,
+                                        width: `${child.coords.width}%`,
+                                        height: `${child.coords.height}%`,
+                                        transform: `rotate(${child.coords.angle || 0}deg)`
+                                    }}>
+                                        {child.type === 'img' && <img src={child.src} className="w-full h-full object-contain" alt="" />}
+                                        {child.type === 'text' && <div style={{ ...child.font, fontSize: `${(child.font?.fontSize / 100) * (targetRef.current?.parentElement?.clientWidth || 1000)}vw` }}>{child.text}</div>}
+                                        {/* Note: Font size in groups might need scaling logic or be simpler */}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {item.type === 'img' && <img
                             loading="lazy"
                             src={item.src}

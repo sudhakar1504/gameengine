@@ -36,7 +36,6 @@ const Pages = ({ setElementsOpen }: any) => {
     return (
         <div className='w-full h-full'>
 
-            <button onClick={addNewPageHandler} className='cursor-pointer rounded-md bg-blue-400 text-white font-bold px-2 py-1 my-2'>Add Page</button>
 
             <div className=' flex  gap-2 items-start flex-wrap'>
                 {allpages.pages.map((page: any) => (
@@ -48,6 +47,8 @@ const Pages = ({ setElementsOpen }: any) => {
                     </div>
                 ))}
             </div>
+            <button onClick={addNewPageHandler} className='cursor-pointer rounded-md bg-blue-400 text-white font-bold px-2 py-1 my-2 mx-auto block'>Add Page</button>
+
         </div>
     )
 }
