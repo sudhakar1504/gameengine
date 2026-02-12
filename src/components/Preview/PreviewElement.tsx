@@ -108,12 +108,12 @@ const PreviewElement = ({ item, onPageChange, width, height }: PreviewElementPro
         const inter = item.interaction;
 
         // Handle Effect Interaction
-        if (inter?.type === 'effect' && inter?.effectValue) {
+        if (inter?.effectValue != "") {
             setActiveEffect(inter.effectValue);
             setTimeout(() => {
                 setActiveEffect(null);
             }, 3000); // 3 seconds duration
-            return;
+
         }
 
         const checkOtherInteraction = () => {

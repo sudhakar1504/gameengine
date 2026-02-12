@@ -28,6 +28,7 @@ export const defaultInteractionConfig = {
     loop: false,
     autoplay: false,
     targetPageId: '',
+    effectValue: "",
     url: '',
     target: '_blank' // '_blank' | '_self'
 };

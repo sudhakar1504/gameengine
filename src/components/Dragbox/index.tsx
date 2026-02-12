@@ -8,7 +8,7 @@ import useStoreconfig from "@/store";
 
 
 export default function DraggableBox({ item, index }: any) {
-    const { editor, updateEditor, setSelectedElementId } = useStoreconfig();
+    const { editor, updateEditor, setSelectedElementId, setElementIndex, setInteractionsData } = useStoreconfig();
     const Data = editor?.elementsList;
     const targetRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -118,8 +118,10 @@ export default function DraggableBox({ item, index }: any) {
     }
 
     const handleInteraction = () => {
-        setInteractionModalOpen(true);
-        setOpen(false);
+        // setInteractionModalOpen(true);
+        // setOpen(false);
+        setElementIndex(index);
+        setInteractionsData(item.interaction);
     }
 
     const saveInteraction = (interactionData: any) => {
@@ -381,12 +383,12 @@ export default function DraggableBox({ item, index }: any) {
                 />
             )}
 
-            <InteractionModal
+            {/* <InteractionModal
                 open={interactionModalOpen}
                 onCancel={() => setInteractionModalOpen(false)}
                 onSave={saveInteraction}
                 initialData={item.interaction}
-            />
+            /> */}
 
             <AnimationDrawer
                 open={animationDrawerOpen}

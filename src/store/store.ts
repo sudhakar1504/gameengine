@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './features/user/userSlice';
 import allpagesReducer from './features/allpages/allpages';
 import editorReducer from './features/editor/editor';
+import interactionReducer from './features/interactions/interaction';
 
 export const makeStore = () => {
     return configureStore({
@@ -9,6 +10,7 @@ export const makeStore = () => {
             user: userReducer,
             allpages: allpagesReducer,
             editor: editorReducer,
+            interaction: interactionReducer,
         },
         devTools: process.env.NODE_ENV !== 'production',
     });

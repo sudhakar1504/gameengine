@@ -1,6 +1,6 @@
 import { Collapse, Modal, Button } from 'antd';
 import React, { useState } from 'react'
-import { defaultImageConfig, defaultTextConfig, defaultAudioConfig, defaultAnimationConfig } from '@/utils/config/defaults';
+import { defaultImageConfig, defaultTextConfig, defaultAudioConfig, defaultAnimationConfig, defaultInteractionConfig } from '@/utils/config/defaults';
 import { audioList } from '@/utils/config/audioList';
 import { imageList } from '@/utils/config/imageList';
 import ImageGallery from '../ImageGallery';
@@ -23,6 +23,7 @@ const Elements = ({ setElementsOpen }: any) => {
                 "zIndex": 1
             },
             "font": defaultTextConfig,
+            "interaction": defaultInteractionConfig,
             "animations": defaultAnimationConfig
         },
         image: {
@@ -46,6 +47,7 @@ const Elements = ({ setElementsOpen }: any) => {
                 flipX: false,
                 flipY: false
             },
+            "interaction": defaultInteractionConfig,
             "animations": defaultAnimationConfig
         },
         audio: {
@@ -59,6 +61,7 @@ const Elements = ({ setElementsOpen }: any) => {
                 "zIndex": 1
             },
             "audio": defaultAudioConfig,
+            "interaction": defaultInteractionConfig,
             "animations": defaultAnimationConfig
         }
     }

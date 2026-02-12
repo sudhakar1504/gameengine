@@ -3,10 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearUser, setUser, updateUser } from './features/user/userSlice';
 import { updateAllPages, setSelectedPage } from './features/allpages/allpages';
 import { updateEditor, setSelectedElementId, setSelectedElementIds, addToSelection, removeFromSelection, clearSelection } from './features/editor/editor';
+import { setElementIndex, setInteractionsData } from './features/interactions/interaction';
 const useStoreconfig = () => {
     const user = useSelector((state: any) => state.user);
     const allpages = useSelector((state: any) => state.allpages);
     const editor = useSelector((state: any) => state.editor);
+    const interaction = useSelector((state: any) => state.interaction);
     const dispatch = useDispatch();
     return {
         user,
@@ -23,6 +25,9 @@ const useStoreconfig = () => {
         addToSelection: (data: number) => dispatch(addToSelection(data)),
         removeFromSelection: (data: number) => dispatch(removeFromSelection(data)),
         clearSelection: () => dispatch(clearSelection()),
+        interaction,
+        setElementIndex: (data: number | null) => dispatch(setElementIndex(data)),
+        setInteractionsData: (data: any) => dispatch(setInteractionsData(data)),
     }
 }
 

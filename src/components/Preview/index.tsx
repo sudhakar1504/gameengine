@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 
 const Preview = () => {
-    const { allpages } = useStoreconfig();
+    const { allpages, setSelectedPage } = useStoreconfig();
     const router = useRouter();
     const [currentPageId, setCurrentPageId] = useState(allpages?.selectedPage);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +81,10 @@ const Preview = () => {
                             height={dimensions.height}
                             key={item.id}
                             item={item}
-                            onPageChange={(id) => setCurrentPageId(id)}
+                            onPageChange={(id) => {
+                                console.log(id);
+                                setSelectedPage(id);
+                            }}
                         />
                     );
                 })}

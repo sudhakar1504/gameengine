@@ -6,10 +6,11 @@ import Sidebar from "@/components/sidebar";
 import { useRouter } from "next/navigation";
 import Preview from "@/components/Preview";
 import useStoreconfig from "@/store";
+import InteractionModal from "@/components/InteractionModal";
 
 export default function Home() {
   const router = useRouter();
-  const { editor, allpages, updateAllPages } = useStoreconfig()
+  const { editor, allpages, updateAllPages, interaction } = useStoreconfig()
   // pages
   const [Allpages, setAllpages] = useState([
     {
@@ -90,6 +91,12 @@ export default function Home() {
           </button>
         </div>}
       </div>
+
+
+
+      {/* interaction panel */}
+      <InteractionModal />
+
     </div>
   );
 }

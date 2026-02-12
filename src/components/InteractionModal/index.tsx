@@ -6,33 +6,39 @@ import { audioList } from '@/utils/config/audioList';
 import { effectsList } from '@/utils/config/effectsList';
 import useStoreconfig from '@/store';
 
-interface InteractionModalProps {
-    open: boolean;
-    onCancel: () => void;
-    onSave: (interactionData: any) => void;
-    initialData?: any;
-}
 
-const InteractionModal = ({ open, onCancel, onSave, initialData }: InteractionModalProps) => {
-    const { allpages } = useStoreconfig();
-    const [data, setData] = useState(initialData || defaultInteractionConfig);
+const InteractionModal = () => {
+    const { allpages, interaction, setElementIndex, setInteractionsData, editor, updateEditor } = useStoreconfig();
+    const Data = editor?.elementsList;
+    const [data, setData] = useState(interaction?.interactionsData || defaultInteractionConfig);
     const [activeTab, setActiveTab] = useState('none');
 
     useEffect(() => {
-        if (open) {
-            setData(initialData || defaultInteractionConfig);
-            setActiveTab(initialData?.type || 'none');
+        if (interaction?.elementIndex !== null) {
+            setData(interaction?.interactionsData || defaultInteractionConfig);
+            setActiveTab(interaction?.interactionsData?.type || 'none');
         }
-    }, [open, initialData]);
+    }, [interaction?.interactionsData]);
 
     const updateData = (key: string, value: any) => {
         setData((prev: any) => ({ ...prev, [key]: value }));
     };
 
     const handleSave = () => {
-        onSave({ ...data, type: activeTab });
-        onCancel();
+        let duplicate = [...Data];
+        duplicate[interaction?.elementIndex] = {
+            ...duplicate[interaction?.elementIndex],
+            interaction: data
+        };
+        updateEditor(duplicate);
+        setElementIndex(null);
+        setInteractionsData(null);
     };
+
+    const cancelHandler = () => {
+        setElementIndex(null);
+        setInteractionsData(null);
+    }
 
     const items = [
         {
@@ -147,10 +153,10 @@ const InteractionModal = ({ open, onCancel, onSave, initialData }: InteractionMo
     return (
         <Modal
             title="Configure Interaction"
-            open={open}
+            open={interaction?.elementIndex !== null}
             onOk={handleSave}
-            onCancel={onCancel}
-            destroyOnClose
+            onCancel={cancelHandler}
+            // destroyOnClose
             zIndex={2000} // Ensure it's above everything
         >
             <Tabs
