@@ -9,15 +9,24 @@ const Sidebar = () => {
     const { allpages } = useStoreconfig()
     const [ElementsOpen, setElementsOpen] = useState<string | null>(null);
     return (
-        <div className='w-full h-full'>
+        <div className='w-full h-full' style={{ background: 'var(--gray-300)', borderRight: '1px solid var(--gray-200)' }}>
 
-            <button className='w-full cursor-pointer border-b-2 border-gray-200 py-2' onClick={() => setElementsOpen("Pages")}>
-                <p className='text-3xl'><i className="fa-solid fa-display"></i></p>
-                <p className='text-xs font-semibold'>Pages</p>
+            <button
+                className='w-full cursor-pointer py-3 flex flex-col items-center gap-1 transition-colors hover:bg-white'
+                style={{ borderBottom: '1px solid var(--gray-200)', color: 'var(--gray-700)' }}
+                onClick={() => setElementsOpen("Pages")}
+            >
+                <i className="fa-solid fa-display" style={{ fontSize: 20 }}></i>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Pages</span>
             </button>
-            <button className={`w-full border-b-2 border-gray-200 py-2 ${allpages?.selectedPage === 0 ? "opacity-50 cursor-not-allowed" : " cursor-pointer"}`} onClick={() => setElementsOpen("Elements")} disabled={allpages?.selectedPage === 0}>
-                <p className='text-3xl'><i className="fa-solid fa-pentagon"></i></p>
-                <p className='text-xs font-semibold'>Elements</p>
+            <button
+                className={`w-full py-3 flex flex-col items-center gap-1 transition-colors ${allpages?.selectedPage === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer hover:bg-white"}`}
+                style={{ borderBottom: '1px solid var(--gray-200)', color: 'var(--gray-700)' }}
+                onClick={() => setElementsOpen("Elements")}
+                disabled={allpages?.selectedPage === 0}
+            >
+                <i className="fa-solid fa-pentagon" style={{ fontSize: 20 }}></i>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Elements</span>
             </button>
 
 

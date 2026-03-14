@@ -160,11 +160,18 @@ const Elements = ({ setElementsOpen }: any) => {
         {
             key: '1',
             label: 'Text',
-            children: <div>
+            children: <div className="flex flex-wrap gap-2 pt-1">
                 {textData.map((element: any) => (
-                    <button onClick={textHandler} key={element.id} className='w-[80px] h-[50px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
-                        {element.icon}
-                        {element.text}
+                    <button
+                        onClick={textHandler}
+                        key={element.id}
+                        className='flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors'
+                        style={{ width: 80, height: 56, background: 'var(--gray-100)', border: '1px solid var(--border-default)', borderRadius: 6 }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--gray-200)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'var(--gray-100)')}
+                    >
+                        <span style={{ fontSize: 16, color: 'var(--gray-600)' }}>{element.icon}</span>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--gray-700)' }}>{element.text}</span>
                     </button>
                 ))}
             </div>,
@@ -172,9 +179,9 @@ const Elements = ({ setElementsOpen }: any) => {
         {
             key: '2',
             label: 'Image',
-            children: <div className='flex flex-col gap-4'>
-                <div className='flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-dashed border-gray-300'>
-                    <span className='text-xs text-gray-500 font-medium'>Recommended Images</span>
+            children: <div className='flex flex-col gap-3 pt-1'>
+                <div className='flex justify-between items-center p-2 rounded' style={{ background: 'var(--gray-50)', border: '1px dashed var(--gray-300)' }}>
+                    <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500 }}>Recommended Images</span>
                     <Button
                         type="primary"
                         size="small"
@@ -186,7 +193,14 @@ const Elements = ({ setElementsOpen }: any) => {
                 </div>
                 <div className='flex flex-wrap gap-2'>
                     {imageList.map((element: any) => (
-                        <button onClick={() => imageHandler(element.src)} key={element.id} className='w-[80px] h-[80px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
+                        <button
+                            onClick={() => imageHandler(element.src)}
+                            key={element.id}
+                            className='cursor-pointer overflow-hidden transition-all'
+                            style={{ width: 80, height: 80, background: 'var(--gray-100)', border: '1px solid var(--border-default)', borderRadius: 6 }}
+                            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
+                            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+                        >
                             <img loading='lazy' src={element.src} className='w-full h-full object-contain' alt="" />
                         </button>
                     ))}
@@ -196,12 +210,16 @@ const Elements = ({ setElementsOpen }: any) => {
         {
             key: '3',
             label: 'Background',
-            children: <div className='flex flex-wrap gap-2'>
+            children: <div className='flex flex-wrap gap-2 pt-1'>
                 {bgList.map((element: any) => (
-                    <button onClick={() => {
-                        bgHandler(element.Image);
-
-                    }} key={element.id} className='w-[80px] h-[80px] rounded-md bg-gray-200 flex items-center justify-center cursor-pointer'>
+                    <button
+                        onClick={() => bgHandler(element.Image)}
+                        key={element.id}
+                        className='cursor-pointer overflow-hidden transition-all'
+                        style={{ width: 80, height: 80, background: 'var(--gray-100)', border: '1px solid var(--border-default)', borderRadius: 6 }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+                    >
                         <img loading='lazy' src={element.Image} className='w-full h-full object-contain' alt="" />
                     </button>
                 ))}
@@ -210,14 +228,21 @@ const Elements = ({ setElementsOpen }: any) => {
         {
             key: '4',
             label: 'Audio',
-            children: <div className='flex flex-col gap-2'>
+            children: <div className='flex flex-col gap-1.5 pt-1'>
                 {audioList.map((audio: any) => (
-                    <button onClick={() => {
-                        setSelectedAudioItem(audio);
-                        setAudioModalOpen(true);
-                    }} key={audio.id} className='w-full h-10 rounded-md bg-gray-100 flex items-center px-4 cursor-pointer hover:bg-gray-200'>
-                        <i className="fa-solid fa-music mr-2 text-gray-500"></i>
-                        <span className="text-sm">{audio.name}</span>
+                    <button
+                        onClick={() => {
+                            setSelectedAudioItem(audio);
+                            setAudioModalOpen(true);
+                        }}
+                        key={audio.id}
+                        className='w-full flex items-center gap-2 px-3 cursor-pointer transition-colors'
+                        style={{ height: 36, background: 'var(--gray-50)', border: '1px solid var(--border-default)', borderRadius: 6, textAlign: 'left' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--gray-100)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'var(--gray-50)')}
+                    >
+                        <i className="fa-solid fa-music" style={{ color: 'var(--gray-400)', fontSize: 12 }}></i>
+                        <span style={{ fontSize: 11, color: 'var(--text-primary)' }}>{audio.name}</span>
                     </button>
                 ))}
             </div>,

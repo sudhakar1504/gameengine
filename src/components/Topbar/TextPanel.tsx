@@ -44,7 +44,8 @@ const TextPanel = ({ item }: TextPanelProps) => {
             {/* Content Content*/}
             <ControlGroup label="Content">
                 <textarea
-                    className='border border-gray-300 text-[10px] rounded p-1 w-40 h-8 resize-none'
+                    className='ctrl-textarea'
+                    style={{ width: 160, height: 32 }}
                     value={item.text}
                     onChange={(e) => updateText(e.target.value)}
                 />

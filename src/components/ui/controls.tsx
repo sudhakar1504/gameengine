@@ -2,7 +2,7 @@ import React from 'react';
 
 // --- Labels ---
 export const Label = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <label className={`text-[10px] font-medium text-gray-500 mb-1 block ${className}`}>
+    <label className={`ctrl-label ${className}`}>
         {children}
     </label>
 );
@@ -38,9 +38,9 @@ export const SliderControl = ({ value, onChange, min = 0, max = 100, step = 1, u
                 step={step}
                 value={value}
                 onChange={(e) => onChange(Number(e.target.value))}
-                className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                className="ctrl-range flex-1"
             />
-            <span className="text-[10px] text-gray-500 w-8 text-right font-mono">
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', minWidth: 32, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                 {value}{unit}
             </span>
         </div>
@@ -56,7 +56,7 @@ interface SelectProps {
 
 export const SelectControl = ({ value, onChange, options, width = "w-24" }: SelectProps) => (
     <select
-        className={`border border-gray-300 text-[10px] rounded p-1 ${width} bg-white focus:outline-none focus:border-blue-500`}
+        className={`ctrl-select ${width}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
     >
@@ -74,16 +74,17 @@ interface ColorProps {
 }
 
 export const ColorControl = ({ value, onChange }: ColorProps) => (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
         <input
             type="color"
-            className="w-6 h-6 p-0 border-0 rounded cursor-pointer overflow-hidden shadow-sm"
+            style={{ width: 28, height: 28, padding: 2, border: '1px solid var(--border-default)', borderRadius: 'var(--control-radius)', cursor: 'pointer', background: 'none' }}
             value={value || "#000000"}
             onChange={(e) => onChange(e.target.value)}
         />
         <input
             type="text"
-            className="border border-gray-300 text-[10px] rounded p-1 w-16 uppercase"
+            className="ctrl-input uppercase"
+            style={{ width: 72 }}
             value={value}
             onChange={(e) => onChange(e.target.value)}
         />
@@ -92,7 +93,7 @@ export const ColorControl = ({ value, onChange }: ColorProps) => (
 
 interface InputProps {
     value: string | number;
-    onChange: (val: string) => void; // Parent can parse number if needed
+    onChange: (val: string) => void;
     type?: "text" | "number";
     width?: string;
     placeholder?: string;
@@ -101,7 +102,7 @@ interface InputProps {
 export const InputControl = ({ value, onChange, type = "text", width = "w-full", placeholder }: InputProps) => (
     <input
         type={type}
-        className={`border border-gray-300 text-[10px] rounded p-1 ${width} focus:outline-none focus:border-blue-500`}
+        className={`ctrl-input ${width}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -111,7 +112,7 @@ export const InputControl = ({ value, onChange, type = "text", width = "w-full",
 interface ToggleProps {
     value: boolean;
     onChange: (val: boolean) => void;
-    label?: string; // Optional label next to icon?
+    label?: string;
     iconOn?: React.ReactNode;
     iconOff?: React.ReactNode;
 }
@@ -119,7 +120,7 @@ interface ToggleProps {
 export const ToggleControl = ({ value, onChange, iconOn, iconOff }: ToggleProps) => (
     <button
         onClick={() => onChange(!value)}
-        className={`w-8 h-8 rounded flex items-center justify-center border transition-colors ${value ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+        className={`btn-toggle ${value ? 'active' : ''}`}
     >
         {value ? (iconOn || "ON") : (iconOff || "OFF")}
     </button>

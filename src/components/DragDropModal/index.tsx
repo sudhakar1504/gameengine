@@ -41,7 +41,7 @@ const ActionRow = ({
     const set = (key: keyof DragDropAction, val: any) => onChange({ ...action, [key]: val });
 
     return (
-        <div className="rounded-lg border border-gray-200 bg-white p-3 flex flex-col gap-2">
+        <div className="flex flex-col gap-2 p-3 rounded" style={{ border: '1px solid var(--border-default)', background: 'var(--surface-elevated)' }}>
             <div className="flex items-center gap-2">
                 <Select
                     className="flex-1 h-8"
@@ -51,7 +51,9 @@ const ActionRow = ({
                 />
                 <button
                     onClick={onDelete}
-                    className="text-gray-400 hover:text-red-500 text-lg leading-none px-1"
+                    style={{ color: 'var(--gray-400)', fontSize: 18, lineHeight: 1, padding: '0 4px', background: 'none', border: 'none', cursor: 'pointer' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-400)')}
                 >
                     ×
                 </button>
@@ -135,14 +137,14 @@ const ActionRow = ({
             )}
 
             {action.type === 'return-to-origin' && (
-                <p className="text-xs text-gray-400 italic">
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
                     The element snaps back to its original position.
                 </p>
             )}
 
             {action.type === 'score' && (
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Points:</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Points:</span>
                     <Input
                         type="number"
                         value={action.scoreValue}
@@ -150,7 +152,7 @@ const ActionRow = ({
                         style={{ width: 80 }}
                         size="small"
                     />
-                    <span className="text-xs text-gray-400">(negative to subtract)</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>(negative to subtract)</span>
                 </div>
             )}
         </div>
@@ -202,11 +204,14 @@ const OutcomeSection = ({
                 />
             ))}
             {actions.length === 0 && (
-                <p className="text-xs text-gray-400 italic">No actions yet.</p>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>No actions yet.</p>
             )}
             <button
                 onClick={add}
-                className="w-full py-1.5 border border-dashed border-blue-300 text-blue-500 text-xs rounded-lg hover:bg-blue-50 transition-colors"
+                className="w-full transition-colors"
+                style={{ padding: '6px 0', border: '1px dashed var(--accent-primary-border)', color: 'var(--accent-primary)', fontSize: 11, borderRadius: 6, background: 'none', cursor: 'pointer' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-primary-light)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'none')}
             >
                 + Add Action
             </button>
@@ -275,41 +280,46 @@ const DragDropModal = () => {
                         <div className="flex gap-2 items-center">
                             <button
                                 onClick={() => setDragDropTargetSelectionMode(true)}
-                                className="flex-1 h-8 px-3 rounded border border-dashed border-orange-400 text-orange-600 text-sm hover:bg-orange-50 transition-colors"
+                                className="flex-1 transition-colors"
+                                style={{ height: 32, padding: '0 12px', borderRadius: 6, border: '1px dashed #F97316', color: '#C2410C', fontSize: 12, background: 'none', cursor: 'pointer' }}
+                                onMouseEnter={e => (e.currentTarget.style.background = '#FFF7ED')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                             >
                                 {local.dropTargetId ? 'Change target' : 'Pick from canvas'}
                             </button>
                             {local.dropTargetId && (
                                 <button
                                     onClick={() => setLocal(p => ({ ...p, dropTargetId: null }))}
-                                    className="h-8 px-2 rounded border border-gray-300 text-gray-400 hover:text-red-500 hover:border-red-300 transition-colors text-sm"
+                                    className="transition-colors"
+                                    style={{ height: 32, padding: '0 10px', borderRadius: 6, border: '1px solid var(--border-default)', color: 'var(--gray-400)', fontSize: 13, background: 'none', cursor: 'pointer' }}
+                                    onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fca5a5'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--gray-400)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
                                 >✕</button>
                             )}
                         </div>
                     </ControlGroup>
 
                     {dropTargetEl ? (
-                        <div className="flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-2">
-                            {/* Mini preview */}
-                            <div className="w-16 h-12 flex-shrink-0 rounded border border-orange-200 bg-white overflow-hidden flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-2 rounded" style={{ border: '1px solid #FED7AA', background: '#FFF7ED' }}>
+                            <div className="flex-shrink-0 overflow-hidden flex items-center justify-center" style={{ width: 64, height: 48, borderRadius: 4, border: '1px solid #FED7AA', background: '#fff' }}>
                                 {dropTargetEl.type === 'img' && (
                                     <img src={dropTargetEl.src} alt="" className="w-full h-full object-contain" />
                                 )}
                                 {dropTargetEl.type === 'text' && (
-                                    <span className="text-[10px] px-1 text-center leading-tight overflow-hidden" style={{ color: dropTargetEl.font?.color || '#000' }}>
+                                    <span style={{ fontSize: 10, padding: '0 4px', textAlign: 'center', lineHeight: 1.3, overflow: 'hidden', color: dropTargetEl.font?.color || '#000' }}>
                                         {(dropTargetEl.text || '').slice(0, 28)}
                                     </span>
                                 )}
-                                {dropTargetEl.type === 'audio' && <i className="fa-solid fa-music text-gray-400" />}
-                                {dropTargetEl.type === 'group' && <i className="fa-solid fa-object-group text-gray-400" />}
+                                {dropTargetEl.type === 'audio' && <i className="fa-solid fa-music" style={{ color: 'var(--gray-400)' }} />}
+                                {dropTargetEl.type === 'group' && <i className="fa-solid fa-object-group" style={{ color: 'var(--gray-400)' }} />}
                             </div>
                             <div>
-                                <p className="text-xs font-medium text-orange-700 capitalize">{dropTargetEl.type}</p>
-                                <p className="text-[11px] text-gray-400">ID: {dropTargetEl.id}</p>
+                                <p style={{ fontSize: 11, fontWeight: 600, color: '#C2410C', textTransform: 'capitalize' }}>{dropTargetEl.type}</p>
+                                <p style={{ fontSize: 10, color: 'var(--text-muted)' }}>ID: {dropTargetEl.id}</p>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-xs text-gray-400 italic">No drop target set. Click above to pick one from the canvas.</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>No drop target set. Click above to pick one from the canvas.</p>
                     )}
                 </div>
             ),

@@ -28,27 +28,50 @@ const Pages = ({ setElementsOpen }: any) => {
         updateAllPages(duplicateAllpages)
         setSelectedPage(id)
         let findCurrentPageIndex = duplicateAllpages.findIndex((page: any) => page.id === id)
-
         updateEditor(duplicateAllpages[findCurrentPageIndex].data)
         setElementsOpen(null)
     }
 
     return (
-        <div className='w-full h-full'>
-
-
-            <div className=' flex  gap-2 items-start flex-wrap'>
+        <div className='w-full h-full flex flex-col gap-3'>
+            <div className='flex gap-2 items-start flex-wrap'>
                 {allpages.pages.map((page: any) => (
-                    <div key={page.id} className='flex flex-col items-center'>
-                        <button className={`w-[80px] h-[80px] cursor-pointer rounded-md bg-gray-400 ${allpages.selectedPage === page.id ? "border-2 border-green-500" : ""}`} onClick={() => selectPageHandler(page.id)}>
-                            <p className='text-white font-bold'> {page.name}</p>
+                    <div key={page.id} className='flex flex-col items-center gap-1'>
+                        <button
+                            className='flex flex-col items-center justify-center cursor-pointer rounded transition-all'
+                            style={{
+                                width: 80,
+                                height: 80,
+                                background: 'var(--gray-200)',
+                                border: allpages.selectedPage === page.id
+                                    ? '2px solid var(--accent-primary)'
+                                    : '2px solid var(--border-default)',
+                                boxShadow: allpages.selectedPage === page.id ? '0 0 0 3px var(--accent-primary-border)' : 'none'
+                            }}
+                            onClick={() => selectPageHandler(page.id)}
+                        >
+                            <i className="fa-regular fa-file" style={{ fontSize: 20, color: 'var(--gray-500)', marginBottom: 4 }}></i>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--gray-700)' }}>{page.name}</span>
                         </button>
-                        <button onClick={() => removePageHandler(page.id)} className='cursor-pointer rounded-md bg-red-400 text-white font-bold px-2 py-1 my-1'><i className="fa-solid fa-trash-can"></i></button>
+                        <button
+                            onClick={() => removePageHandler(page.id)}
+                            className='btn btn-sm'
+                            style={{ background: 'var(--gray-100)', border: '1px solid var(--border-default)', color: 'var(--gray-500)' }}
+                            title="Delete page"
+                        >
+                            <i className="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
                 ))}
             </div>
-            <button onClick={addNewPageHandler} className='cursor-pointer rounded-md bg-blue-400 text-white font-bold px-2 py-1 my-2 mx-auto block'>Add Page</button>
-
+            <button
+                onClick={addNewPageHandler}
+                className='btn btn-primary'
+                style={{ alignSelf: 'flex-start' }}
+            >
+                <i className="fa-solid fa-plus"></i>
+                Add Page
+            </button>
         </div>
     )
 }

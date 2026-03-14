@@ -6,8 +6,14 @@ interface AllPagesState {
 }
 
 const initialState: AllPagesState = {
-    pages: [],
-    selectedPage: 0,
+    pages: [
+        {
+            id: 1,
+            name: "Page 1",
+            content: "Content of Page 1",
+        },
+    ],
+    selectedPage: 1,
 };
 
 export const allPagesSlice = createSlice({

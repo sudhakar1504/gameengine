@@ -86,7 +86,7 @@ const InteractionModal = () => {
         {
             key: 'none',
             label: 'None',
-            children: <div className="p-4 text-gray-500 italic">No interaction assigned.</div>
+            children: <div className="p-4" style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: 12 }}>No interaction assigned.</div>
         },
         {
             key: 'audio',
@@ -183,7 +183,7 @@ const InteractionModal = () => {
                     </ControlGroup>
 
                     {!data.effectValue && (
-                        <div className="mt-2 text-gray-400 text-sm">
+                        <div className="mt-2" style={{ color: 'var(--text-muted)', fontSize: 11 }}>
                             Select an effect to see it in action in Preview mode.
                         </div>
                     )}
@@ -205,14 +205,20 @@ const InteractionModal = () => {
                             <div className="flex gap-2 items-center">
                                 <button
                                     onClick={() => setTriggerSelectionMode(true)}
-                                    className="flex-1 h-8 px-3 rounded border border-dashed border-blue-400 text-blue-600 text-sm hover:bg-blue-50 transition-colors"
+                                    className="flex-1 transition-colors"
+                                    style={{ height: 32, padding: '0 12px', borderRadius: 6, border: '1px dashed var(--accent-primary-border)', color: 'var(--accent-primary)', fontSize: 12, background: 'none', cursor: 'pointer' }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-primary-light)')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                                 >
                                     {data.triggerElementId ? 'Change element' : 'Pick from canvas'}
                                 </button>
                                 {data.triggerElementId && (
                                     <button
                                         onClick={() => updateData('triggerElementId', '')}
-                                        className="h-8 px-2 rounded border border-gray-300 text-gray-400 text-sm hover:text-red-500 hover:border-red-300 transition-colors"
+                                        className="transition-colors"
+                                        style={{ height: 32, padding: '0 10px', borderRadius: 6, border: '1px solid var(--border-default)', color: 'var(--gray-400)', fontSize: 13, background: 'none', cursor: 'pointer' }}
+                                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fca5a5'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--gray-400)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
                                     >
                                         ✕
                                     </button>

@@ -105,13 +105,12 @@ export default function DraggableBox({ item, index }: any) {
 
     const changeZIndex = (direction: "front" | "back") => {
         let duplicate = [...Data];
-        let currentZIndex = duplicate[index].zIndex || 1;
         if (direction === "front") {
             const maxZIndex = Math.max(...duplicate.map((i: any) => i.zIndex || 1));
-            duplicate[index].zIndex = maxZIndex + 1;
+            duplicate[index] = { ...duplicate[index], zIndex: maxZIndex + 1 };
         } else {
             const minZIndex = Math.min(...duplicate.map((i: any) => i.zIndex || 1));
-            duplicate[index].zIndex = minZIndex - 1;
+            duplicate[index] = { ...duplicate[index], zIndex: minZIndex - 1 };
         }
         updateEditor(duplicate);
         setOpen(false);
