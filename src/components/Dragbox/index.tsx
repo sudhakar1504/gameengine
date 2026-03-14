@@ -5,10 +5,17 @@ import { Popover } from "antd";
 import InteractionModal from "../InteractionModal";
 import AnimationDrawer from "../AnimationDrawer";
 import useStoreconfig from "@/store";
+import { defaultDragDropConfig } from "@/utils/config/defaults";
 
 
 export default function DraggableBox({ item, index }: any) {
-    const { editor, updateEditor, setSelectedElementId, setElementIndex, setInteractionsData } = useStoreconfig();
+    const {
+        editor, updateEditor, setSelectedElementId,
+        setElementIndex, setInteractionsData, interaction,
+        setTriggerSelectionMode, setPendingTriggerElementId,
+        dragDrop, setDragDropElementIndex, setDragDropData,
+        setDragDropTargetSelectionMode, setPendingDragDropTargetId,
+    } = useStoreconfig();
     const Data = editor?.elementsList;
     const targetRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -139,6 +146,18 @@ export default function DraggableBox({ item, index }: any) {
         setOpen(false);
     }
 
+    const handleDragDrop = () => {
+        setDragDropElementIndex(index);
+        setDragDropData(item.dragDrop || defaultDragDropConfig);
+        setOpen(false);
+    }
+
+    // Selection mode flags
+    const isSelectionMode = interaction?.triggerSelectionMode;
+    const isSourceElement = isSelectionMode && interaction?.elementIndex === index;
+    const isDragDropTargetMode = dragDrop?.targetSelectionMode;
+    const isDragDropSource = isDragDropTargetMode && dragDrop?.elementIndex === index;
+
     const saveAnimation = (animationData: any) => {
         let duplicate = [...Data];
         duplicate[index] = {
@@ -215,6 +234,12 @@ export default function DraggableBox({ item, index }: any) {
             <button className="hover:bg-gray-100 px-2 py-1 rounded text-left" onClick={handleInteraction}>
                 Interaction
             </button>
+            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left flex items-center gap-2" onClick={handleDragDrop}>
+                Drag and Drop
+                {item.dragDrop?.dropTargetId && (
+                    <span className="text-[9px] bg-orange-100 text-orange-600 px-1 rounded">configured</span>
+                )}
+            </button>
             <button className="hover:bg-gray-100 px-2 py-1 rounded text-left" onClick={handleAnimation}>
                 Animation
             </button>
@@ -271,8 +296,22 @@ export default function DraggableBox({ item, index }: any) {
                     ref={targetRef}
                     onClick={(e) => {
                         e.stopPropagation();
-                        // If shift key is pressed, toggle selection (future improvement)
-                        // For now just set as selected
+                        // Trigger-animation target selection mode
+                        if (isSelectionMode) {
+                            if (!isSourceElement) {
+                                setPendingTriggerElementId(item.id);
+                                setTriggerSelectionMode(false);
+                            }
+                            return;
+                        }
+                        // Drag-drop target selection mode
+                        if (isDragDropTargetMode) {
+                            if (!isDragDropSource) {
+                                setPendingDragDropTargetId(item.id);
+                                setDragDropTargetSelectionMode(false);
+                            }
+                            return;
+                        }
                         if (!isMultiSelected) {
                             setSelectedElementId(item.id);
                         }
@@ -280,9 +319,18 @@ export default function DraggableBox({ item, index }: any) {
                     style={{
                         position: "absolute",
                         zIndex: item?.zIndex || 1,
-                        cursor: "move",
-                        border: isSelected ? "2px solid #1890ff" : "1px solid transparent", // thicker border for visibility
+                        cursor: isSelectionMode
+                            ? (isSourceElement ? 'not-allowed' : 'crosshair')
+                            : isDragDropTargetMode
+                                ? (isDragDropSource ? 'not-allowed' : 'crosshair')
+                                : 'move',
+                        border: isSelectionMode
+                            ? isSourceElement ? '2px dashed #aaa' : '2px dashed #22c55e'
+                            : isDragDropTargetMode
+                                ? isDragDropSource ? '2px dashed #aaa' : '2px dashed #f97316'
+                                : isSelected ? '2px solid #1890ff' : '1px solid transparent',
                         boxSizing: "border-box",
+                        opacity: (isSourceElement || isDragDropSource) ? 0.4 : 1,
                     }}
                 >
                     <div

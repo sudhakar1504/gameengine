@@ -3,12 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearUser, setUser, updateUser } from './features/user/userSlice';
 import { updateAllPages, setSelectedPage } from './features/allpages/allpages';
 import { updateEditor, setSelectedElementId, setSelectedElementIds, addToSelection, removeFromSelection, clearSelection } from './features/editor/editor';
-import { setElementIndex, setInteractionsData } from './features/interactions/interaction';
+import { setElementIndex, setInteractionsData, setTriggerSelectionMode, setPendingTriggerElementId } from './features/interactions/interaction';
+import { setDragDropElementIndex, setDragDropData, setDragDropTargetSelectionMode, setPendingDragDropTargetId } from './features/dragDrop/dragDropSlice';
 const useStoreconfig = () => {
     const user = useSelector((state: any) => state.user);
     const allpages = useSelector((state: any) => state.allpages);
     const editor = useSelector((state: any) => state.editor);
     const interaction = useSelector((state: any) => state.interaction);
+    const dragDrop = useSelector((state: any) => state.dragDrop);
     const dispatch = useDispatch();
     return {
         user,
@@ -28,6 +30,13 @@ const useStoreconfig = () => {
         interaction,
         setElementIndex: (data: number | null) => dispatch(setElementIndex(data)),
         setInteractionsData: (data: any) => dispatch(setInteractionsData(data)),
+        setTriggerSelectionMode: (data: boolean) => dispatch(setTriggerSelectionMode(data)),
+        setPendingTriggerElementId: (data: string | number | null) => dispatch(setPendingTriggerElementId(data)),
+        dragDrop,
+        setDragDropElementIndex: (data: number | null) => dispatch(setDragDropElementIndex(data)),
+        setDragDropData: (data: any) => dispatch(setDragDropData(data)),
+        setDragDropTargetSelectionMode: (data: boolean) => dispatch(setDragDropTargetSelectionMode(data)),
+        setPendingDragDropTargetId: (data: string | number | null) => dispatch(setPendingDragDropTargetId(data)),
     }
 }
 

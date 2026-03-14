@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Preview from "@/components/Preview";
 import useStoreconfig from "@/store";
 import InteractionModal from "@/components/InteractionModal";
+import DragDropModal from "@/components/DragDropModal";
 
 export default function Home() {
   const router = useRouter();
@@ -96,6 +97,7 @@ export default function Home() {
 
       {/* interaction panel */}
       <InteractionModal />
+      <DragDropModal />
 
     </div>
   );

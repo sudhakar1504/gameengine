@@ -3,6 +3,7 @@ import userReducer from './features/user/userSlice';
 import allpagesReducer from './features/allpages/allpages';
 import editorReducer from './features/editor/editor';
 import interactionReducer from './features/interactions/interaction';
+import dragDropReducer from './features/dragDrop/dragDropSlice';
 
 export const makeStore = () => {
     return configureStore({
@@ -11,6 +12,7 @@ export const makeStore = () => {
             allpages: allpagesReducer,
             editor: editorReducer,
             interaction: interactionReducer,
+            dragDrop: dragDropReducer,
         },
         devTools: process.env.NODE_ENV !== 'production',
     });

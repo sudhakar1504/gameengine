@@ -1,5 +1,6 @@
 import React, { useState, useLayoutEffect, useRef, useMemo } from 'react'
 import DraggableBox from '../Dragbox/index'
+import DragDropConnector from '../DragDropConnector'
 import useStoreconfig from '@/store';
 
 const Slideview = () => {
@@ -212,6 +213,7 @@ const Slideview = () => {
                     <DraggableBox key={item.id} item={item} index={index} />
                 )
             })}
+            <DragDropConnector containerWidth={dimensions.width} containerHeight={dimensions.height} />
         </div>
     )
 }

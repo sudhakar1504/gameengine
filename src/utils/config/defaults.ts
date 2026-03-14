@@ -23,14 +23,23 @@ export const defaultImageConfig = {
 };
 
 export const defaultInteractionConfig = {
-    type: 'none', // 'none' | 'audio' | 'page' | 'link'
+    type: 'none', // 'none' | 'audio' | 'page' | 'link' | 'effect' | 'triggerAnim'
     audioSrc: '',
     loop: false,
     autoplay: false,
     targetPageId: '',
     effectValue: "",
     url: '',
-    target: '_blank' // '_blank' | '_self'
+    target: '_blank', // '_blank' | '_self'
+    triggerElementId: '',
+    triggerAnimationConfig: {
+        effect: 'none',
+        direction: 'none',
+        animationDirection: 'normal',
+        transitionType: 'ease',
+        delay: 0,
+        speed: 1,
+    },
 };
 
 export const defaultAudioConfig = {
@@ -100,6 +109,52 @@ export const animationEasingTypes = [
     { label: "Step Start", value: "step-start" },
     { label: "Step End", value: "step-end" },
 ];
+
+// ---------- Drag & Drop ----------
+
+export interface DragDropAction {
+    id: string;
+    type: 'audio' | 'effect' | 'animation' | 'go-to-page' | 'return-to-origin' | 'score';
+    audioSrc?: string;
+    loop?: boolean;
+    effectValue?: string;
+    animEffect?: string;
+    animDirection?: string;
+    animSpeed?: number;
+    targetPageId?: string | number;
+    scoreValue?: number;
+}
+
+export interface DragDropOutcome {
+    actions: DragDropAction[];
+}
+
+export interface DragDropConfig {
+    dropTargetId: string | number | null;
+    correctDrop: DragDropOutcome;
+    wrongDrop: DragDropOutcome;
+    missedDrop: DragDropOutcome & { timeout: number };
+}
+
+export const defaultDragDropAction = (): DragDropAction => ({
+    id: String(Date.now() + Math.random()),
+    type: 'audio',
+    audioSrc: '',
+    loop: false,
+    effectValue: '',
+    animEffect: 'none',
+    animDirection: 'none',
+    animSpeed: 1,
+    targetPageId: '',
+    scoreValue: 0,
+});
+
+export const defaultDragDropConfig: DragDropConfig = {
+    dropTargetId: null,
+    correctDrop: { actions: [] },
+    wrongDrop: { actions: [] },
+    missedDrop: { actions: [], timeout: 0 },
+};
 
 export const fontFamilies = [
     "Arial",
