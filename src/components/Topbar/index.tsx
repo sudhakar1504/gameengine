@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { downloadHtml } from '@/utils/exportHtml';
 
 const Topbar = () => {
-    const { editor, interaction, setTriggerSelectionMode, dragDrop, setDragDropTargetSelectionMode, allpages, updateAllPages } = useStoreconfig();
+    const { editor, interaction, setTriggerSelectionMode, dragDrop, setDragDropTargetSelectionMode, allpages, updateAllPages, exitWindowEditMode } = useStoreconfig();
     const router = useRouter();
 
     const item = useMemo(() => {
@@ -18,9 +18,16 @@ const Topbar = () => {
     const isDragDropTargetMode = dragDrop?.targetSelectionMode;
 
     const enterPreview = () => {
-        // save current page data
+        // If in window edit mode, exit first so editor.elementsList is the page elements
+        if (editor?.windowEditMode?.active) {
+            exitWindowEditMode();
+        }
+        // save current page data — read from store after potential exit
+        const currentList = editor?.windowEditMode?.active
+            ? editor?.windowEditMode?.savedElements  // use saved page elements directly
+            : editor?.elementsList;
         const updated = allpages?.pages?.map((i: any) =>
-            i.id === allpages?.selectedPage ? { ...i, data: editor?.elementsList } : i
+            i.id === allpages?.selectedPage ? { ...i, data: currentList } : i
         );
         updateAllPages(updated);
         router.push('/preview');

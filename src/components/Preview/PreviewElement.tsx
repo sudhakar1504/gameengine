@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react';
+import { Modal } from 'antd';
 
 interface PreviewElementProps {
     item: any;
@@ -21,6 +22,15 @@ const PreviewElement = ({ item, onPageChange, width, height, onTriggerAnimation,
     const [isHovered, setIsHovered] = useState(false);
     const [audio] = useState(() => (item.type === 'audio' || item.interaction?.audioSrc !== '') ? new Audio() : null);
     const [activeEffect, setActiveEffect] = useState<string | null>(null);
+    const [showWindowPopup, setShowWindowPopup] = useState(false);
+    const windowCanvasRef = useRef<HTMLDivElement>(null);
+    const [windowCanvasWidth, setWindowCanvasWidth] = useState(600);
+    const [windowCanvasHeight, setWindowCanvasHeight] = useState(360);
+    const [windowAnimTriggers, setWindowAnimTriggers] = useState<Record<string | number, { config: any; tick: number }>>({});
+
+    const handleWindowTriggerAnimation = (elementId: string | number, animConfig: any) => {
+        setWindowAnimTriggers(prev => ({ ...prev, [elementId]: { config: animConfig, tick: Date.now() } }));
+    };
 
     // Drag state for drag-drop elements
     const hasDragDrop = !!item.dragDrop?.dropTargetId;
@@ -202,8 +212,15 @@ const PreviewElement = ({ item, onPageChange, width, height, onTriggerAnimation,
             }
         }
 
+
+
         // 2. Handle Interaction
         const inter = item.interaction;
+
+        // Handle Window Interaction (independent boolean — can combine with other interactions)
+        if (inter?.showWindow) {
+            setShowWindowPopup(true);
+        }
 
         // Handle Trigger Animation Interaction
         if (inter?.type === 'triggerAnim' && inter?.triggerElementId && onTriggerAnimation) {
@@ -211,14 +228,15 @@ const PreviewElement = ({ item, onPageChange, width, height, onTriggerAnimation,
             return;
         }
 
-        // Handle Effect Interaction
-        if (inter?.effectValue != "") {
+        // Handle Effect Interaction (only when type is 'effect')
+        if (inter?.type === 'effect' && inter?.effectValue) {
             setActiveEffect(inter.effectValue);
             setTimeout(() => {
                 setActiveEffect(null);
-            }, 3000); // 3 seconds duration
-
+            }, 3000);
         }
+
+
 
         const checkOtherInteraction = () => {
             if (inter?.targetPageId) {
@@ -267,8 +285,66 @@ const PreviewElement = ({ item, onPageChange, width, height, onTriggerAnimation,
         }
     }, []);
 
+    const inter = item.interaction;
+
     return (
         <>
+            {/* Window popup */}
+            {showWindowPopup && (
+                <Modal
+                    title={inter?.windowTitle || 'Window'}
+                    open={showWindowPopup}
+                    onCancel={() => setShowWindowPopup(false)}
+                    footer={null}
+                    width="90vw"
+                    style={{ maxWidth: 1000 }}
+                    zIndex={999999}
+                    destroyOnClose
+                    afterOpenChange={(open) => {
+                        if (open && windowCanvasRef.current) {
+                            setWindowCanvasWidth(windowCanvasRef.current.clientWidth);
+                            setWindowCanvasHeight(windowCanvasRef.current.clientHeight);
+                        }
+                    }}
+                >
+                    {/* Canvas: same aspect ratio as editor (1000 × 600 = 5:3) */}
+                    <div style={{ position: 'relative', width: '100%', paddingTop: '60%' }}>
+                        <div
+                            ref={windowCanvasRef}
+                            style={{
+                                position: 'absolute',
+                                inset: 0,
+                                overflow: 'hidden',
+                                borderRadius: 6,
+                                border: '1px solid #e8e8e8',
+                                background: (() => {
+                                    const bg = (inter?.windowElements || []).find((e: any) => e.type === 'bg');
+                                    return bg?.src ? `url(${bg.src}) center/cover no-repeat` : '#fff';
+                                })(),
+                            }}
+                        >
+                            {(inter?.windowElements || []).length === 0 && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 13 }}>
+                                    No content in this window.
+                                </div>
+                            )}
+                            {(inter?.windowElements || [])
+                                .filter((el: any) => el.type !== 'bg')
+                                .map((el: any) => (
+                                    <PreviewElement
+                                        key={el.id}
+                                        item={el}
+                                        onPageChange={onPageChange}
+                                        width={windowCanvasWidth}
+                                        height={windowCanvasHeight}
+                                        onTriggerAnimation={handleWindowTriggerAnimation}
+                                        externalAnimTrigger={windowAnimTriggers[el.id]}
+                                    />
+                                ))}
+                        </div>
+                    </div>
+                </Modal>
+            )}
             {activeEffect && <div style={{
                 position: 'absolute',
                 top: 0,

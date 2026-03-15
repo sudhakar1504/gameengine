@@ -49,8 +49,9 @@ function buildElementHtml(el: any, containerWidthVw: number): string {
         'user-select': 'none',
     };
     if (coords.angle) baseStyle.transform = `rotate(${coords.angle}deg)`;
-    if (isDraggable && !interaction?.type) baseStyle.cursor = 'grab';
-    else if (interaction?.type && interaction.type !== 'none') baseStyle.cursor = 'pointer';
+    const hasInteraction = (interaction?.type && interaction.type !== 'none') || interaction?.showWindow;
+    if (isDraggable && !hasInteraction) baseStyle.cursor = 'grab';
+    else if (hasInteraction) baseStyle.cursor = 'pointer';
 
     // animations dataset (serialised to data-attr)
     const animEntrance = buildAnimString(animations?.entrance);
@@ -132,9 +133,43 @@ function buildElementHtml(el: any, containerWidthVw: number): string {
   </div>`;
 }
 
+function buildWindowPopupHtml(el: any): string {
+    if (!el.interaction?.showWindow) return '';
+    const windowElements: any[] = el.interaction.windowElements || [];
+    const bgEl = windowElements.find((e: any) => e.type === 'bg');
+    const bgStyle = bgEl?.src
+        ? `background-image:url('${bgEl.src}');background-size:cover;background-position:center;`
+        : 'background:#ffffff;';
+    // window canvas is ~90vw wide; use 90 as containerWidthVw for font scaling
+    const innerHtml = windowElements
+        .filter((e: any) => e.type !== 'bg')
+        .map((e: any) => buildElementHtml(e, 90))
+        .join('');
+    const title = escapeHtml(el.interaction.windowTitle || 'Window');
+    return `
+<div class="ge-window-modal" id="ge-window-${escapeHtml(String(el.id))}">
+  <div class="ge-window-header">
+    <span>${title}</span>
+    <button class="ge-window-close" id="ge-close-${escapeHtml(String(el.id))}">&#215;</button>
+  </div>
+  <div class="ge-window-canvas-wrap">
+    <div class="ge-window-canvas" style="${bgStyle}">
+      ${innerHtml}
+      <div class="ge-window-effect-layer" style="position:absolute;inset:0;pointer-events:none;z-index:999999;overflow:hidden;"></div>
+    </div>
+  </div>
+</div>`;
+}
+
 export function generateHtml(allpages: any): string {
     const pages: any[] = allpages?.pages ?? [];
     const containerWidthVw = 100; // exported file uses 100vw-equivalent calc
+
+    // ── collect all window popups across all pages ────────────────────────────
+    const windowPopupsHtml = pages.flatMap((page: any) =>
+        (page.data ?? []).filter((el: any) => el.interaction?.showWindow)
+            .map((el: any) => buildWindowPopupHtml(el))
+    ).join('\n');
 
     // ── build pages HTML ─────────────────────────────────────────────────────
     const pagesHtml = pages.map((page: any, pi: number) => {
@@ -284,6 +319,33 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Ari
   0%{transform:translateY(0);}50%{transform:translateY(-10px);}100%{transform:translateY(0);}
 }
 
+/* ── window popup ── */
+#ge-window-overlay{
+  display:none;position:fixed;inset:0;z-index:9999998;
+  background:rgba(0,0,0,.6);align-items:center;justify-content:center;
+}
+#ge-window-overlay.active{display:flex;}
+.ge-window-modal{
+  display:none;position:relative;width:90vw;max-width:900px;
+  background:#fff;border-radius:8px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.ge-window-modal.active{display:block;}
+.ge-window-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid #e8e8e8;
+  font-size:14px;font-weight:600;
+}
+.ge-window-close{
+  background:none;border:none;cursor:pointer;font-size:20px;
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#666;line-height:1;
+}
+.ge-window-close:hover{background:#f5f5f5;}
+.ge-window-canvas-wrap{position:relative;width:100%;padding-top:60%;}
+.ge-window-canvas{position:absolute;inset:0;overflow:hidden;}
+
 /* ── effect animations ── */
 @keyframes confetti-fall {
   0%{transform:translateY(-10vh) rotate(0deg);opacity:1;}
@@ -306,6 +368,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Ari
     <div id="ge-score">⭐ Score: <span id="ge-score-val">0</span></div>
     <div id="ge-effect-layer"></div>
   </div>
+</div>
+
+<!-- Window popup overlay -->
+<div id="ge-window-overlay">
+${windowPopupsHtml}
 </div>
 
 <div id="ge-start-overlay">
@@ -434,8 +501,8 @@ function runEntranceAnimations(pageEl){
 /* ─────────────────────────────────────────────
    EFFECTS
 ───────────────────────────────────────────── */
-function showEffect(type){
-  const layer = document.getElementById('ge-effect-layer');
+function showEffect(type, effectLayer){
+  const layer = effectLayer || document.getElementById('ge-effect-layer');
   layer.innerHTML = '';
   let html = '';
 
@@ -477,6 +544,32 @@ function showEffect(type){
 }
 
 /* ─────────────────────────────────────────────
+   WINDOW POPUP
+───────────────────────────────────────────── */
+function openWindow(elId){
+  const overlay = document.getElementById('ge-window-overlay');
+  document.querySelectorAll('.ge-window-modal').forEach(m => m.classList.remove('active'));
+  const modal = document.getElementById('ge-window-' + elId);
+  if(modal){
+    modal.classList.add('active');
+    // run entrance animations for window elements
+    const canvas = modal.querySelector('.ge-window-canvas');
+    if(canvas) runEntranceAnimations(canvas);
+  }
+  overlay.classList.add('active');
+}
+function closeWindow(){
+  document.getElementById('ge-window-overlay').classList.remove('active');
+  document.querySelectorAll('.ge-window-modal').forEach(m => m.classList.remove('active'));
+}
+// expose to global so inline onclick and close buttons can reach them
+window.openWindow = openWindow;
+window.closeWindow = closeWindow;
+document.getElementById('ge-window-overlay').addEventListener('click', function(e){
+  if(e.target === this) closeWindow();
+});
+
+/* ─────────────────────────────────────────────
    INTERACTION HANDLER (click)
 ───────────────────────────────────────────── */
 function handleInteraction(elDiv){
@@ -484,7 +577,7 @@ function handleInteraction(elDiv){
   if(!raw) return;
   let inter;
   try{ inter = JSON.parse(raw); } catch(e){ return; }
-  if(!inter || inter.type === 'none') return;
+  if(!inter) return;
 
   const content = elDiv.querySelector('.ge-content');
 
@@ -498,8 +591,20 @@ function handleInteraction(elDiv){
     setTimeout(() => { content.style.animation = contAnim || ''; }, speed + delay);
   }
 
-  // effect
-  if(inter.effectValue) showEffect(inter.effectValue);
+  // window popup (independent of type)
+  if(inter.showWindow){ openWindow(elDiv.dataset.id); }
+
+  // if type is 'none' stop here (no other interactions)
+  if(!inter.type || inter.type === 'none') return;
+
+  // detect if this element is inside a popup — effects should render there, not on the main stage
+  const windowCanvas = elDiv.closest('.ge-window-canvas');
+  const effectLayer = windowCanvas
+    ? windowCanvas.querySelector('.ge-window-effect-layer')
+    : null;
+
+  // effect (only when type === 'effect')
+  if(inter.type === 'effect' && inter.effectValue) showEffect(inter.effectValue, effectLayer);
 
   // trigger animation on another element
   if(inter.type === 'triggerAnim' && inter.triggerElementId){
@@ -780,6 +885,18 @@ function initPageElements(pageEl){
 ───────────────────────────────────────────── */
 document.querySelectorAll('.ge-page').forEach(pageEl => {
   initPageElements(pageEl);
+});
+
+// init window popup element interactions + close buttons
+document.querySelectorAll('.ge-window-modal').forEach(modal => {
+  const closeBtn = modal.querySelector('.ge-window-close');
+  if(closeBtn) closeBtn.addEventListener('click', closeWindow);
+  const canvas = modal.querySelector('.ge-window-canvas');
+  if(!canvas) return;
+  canvas.querySelectorAll('.ge-el').forEach(elDiv => {
+    initHover(elDiv);
+    elDiv.addEventListener('click', () => handleInteraction(elDiv));
+  });
 });
 
 // run entrance on first page

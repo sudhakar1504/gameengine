@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser, setUser, updateUser } from './features/user/userSlice';
 import { updateAllPages, setSelectedPage } from './features/allpages/allpages';
-import { updateEditor, setSelectedElementId, setSelectedElementIds, addToSelection, removeFromSelection, clearSelection } from './features/editor/editor';
+import { updateEditor, setSelectedElementId, setSelectedElementIds, addToSelection, removeFromSelection, clearSelection, enterWindowEditMode, exitWindowEditMode, copyElement, pasteElement, duplicateElement } from './features/editor/editor';
 import { setElementIndex, setInteractionsData, setTriggerSelectionMode, setPendingTriggerElementId } from './features/interactions/interaction';
 import { setDragDropElementIndex, setDragDropData, setDragDropTargetSelectionMode, setPendingDragDropTargetId } from './features/dragDrop/dragDropSlice';
 const useStoreconfig = () => {
@@ -27,6 +27,11 @@ const useStoreconfig = () => {
         addToSelection: (data: number) => dispatch(addToSelection(data)),
         removeFromSelection: (data: number) => dispatch(removeFromSelection(data)),
         clearSelection: () => dispatch(clearSelection()),
+        enterWindowEditMode: (data: { elementIndex: number; windowElements: any[]; windowTitle: string }) => dispatch(enterWindowEditMode(data)),
+        exitWindowEditMode: () => dispatch(exitWindowEditMode()),
+        copyElement: (index: number) => dispatch(copyElement(index)),
+        pasteElement: () => dispatch(pasteElement()),
+        duplicateElement: (index: number) => dispatch(duplicateElement(index)),
         interaction,
         setElementIndex: (data: number | null) => dispatch(setElementIndex(data)),
         setInteractionsData: (data: any) => dispatch(setInteractionsData(data)),

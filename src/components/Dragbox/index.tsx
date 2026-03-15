@@ -15,6 +15,7 @@ export default function DraggableBox({ item, index }: any) {
         setTriggerSelectionMode, setPendingTriggerElementId,
         dragDrop, setDragDropElementIndex, setDragDropData,
         setDragDropTargetSelectionMode, setPendingDragDropTargetId,
+        copyElement, pasteElement, duplicateElement,
     } = useStoreconfig();
     const Data = editor?.elementsList;
     const targetRef = useRef<HTMLDivElement>(null);
@@ -222,32 +223,49 @@ export default function DraggableBox({ item, index }: any) {
         setOpen(false);
     };
 
+    const hasClipboard = !!editor?.clipboard;
+
     const content = (
-        <div className="flex flex-col gap-2">
-            <button onClick={() => changeZIndex("front")} className="hover:bg-gray-100 px-2 py-1 rounded text-left">
+        <div className="flex flex-col gap-1" style={{ minWidth: 160 }}>
+            <button onClick={() => changeZIndex("front")} className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm">
                 Bring to Front
             </button>
-            <button onClick={() => changeZIndex("back")} className="hover:bg-gray-100 px-2 py-1 rounded text-left">
+            <button onClick={() => changeZIndex("back")} className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm">
                 Push to Back
             </button>
-            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left" onClick={handleInteraction}>
+            <div style={{ borderTop: '1px solid #f0f0f0', margin: '2px 0' }} />
+            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm" onClick={() => { copyElement(index); setOpen(false); }}>
+                Copy
+            </button>
+            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm" onClick={() => { duplicateElement(index); setOpen(false); }}>
+                Duplicate
+            </button>
+            <button
+                className={`px-2 py-1 rounded text-left text-sm ${hasClipboard ? 'hover:bg-gray-100' : 'opacity-40 cursor-not-allowed'}`}
+                onClick={() => { if (hasClipboard) { pasteElement(); setOpen(false); } }}
+            >
+                Paste
+            </button>
+            <div style={{ borderTop: '1px solid #f0f0f0', margin: '2px 0' }} />
+            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm" onClick={handleInteraction}>
                 Interaction
             </button>
-            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left flex items-center gap-2" onClick={handleDragDrop}>
+            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm flex items-center gap-2" onClick={handleDragDrop}>
                 Drag and Drop
                 {item.dragDrop?.dropTargetId && (
                     <span className="text-[9px] bg-orange-100 text-orange-600 px-1 rounded">configured</span>
                 )}
             </button>
-            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left" onClick={handleAnimation}>
+            <button className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm" onClick={handleAnimation}>
                 Animation
             </button>
             {item.type === 'group' && (
-                <button onClick={ungroupItem} className="hover:bg-gray-100 px-2 py-1 rounded text-left">
+                <button onClick={ungroupItem} className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm">
                     Ungroup
                 </button>
             )}
-            <button onClick={() => deleteItem()} className="hover:bg-gray-100 px-2 py-1 rounded text-left text-red-500">
+            <div style={{ borderTop: '1px solid #f0f0f0', margin: '2px 0' }} />
+            <button onClick={() => deleteItem()} className="hover:bg-gray-100 px-2 py-1 rounded text-left text-sm text-red-500">
                 Delete
             </button>
         </div>

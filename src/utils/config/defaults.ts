@@ -40,6 +40,20 @@ export const defaultInteractionConfig = {
         delay: 0,
         speed: 1,
     },
+    showWindow: false,
+    windowTitle: 'Popup Window',
+    windowElements: [] as Array<{
+        id: number;
+        type: 'text' | 'img';
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        text?: string;
+        src?: string;
+        fontSize?: number;
+        color?: string;
+    }>,
 };
 
 export const defaultAudioConfig = {

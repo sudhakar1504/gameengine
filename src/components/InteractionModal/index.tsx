@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, Tabs, Input, Checkbox, Select } from 'antd';
+import { Modal, Tabs, Input, Checkbox, Select, Button, Switch } from 'antd';
 import { ControlGroup } from '../ui/controls';
 import { defaultInteractionConfig, animationEffects, animationDirections, playDirections, animationEasingTypes } from '@/utils/config/defaults';
 import { audioList } from '@/utils/config/audioList';
@@ -8,7 +8,7 @@ import useStoreconfig from '@/store';
 
 
 const InteractionModal = () => {
-    const { allpages, interaction, setElementIndex, setInteractionsData, setTriggerSelectionMode, setPendingTriggerElementId, editor, updateEditor } = useStoreconfig();
+    const { allpages, interaction, setElementIndex, setInteractionsData, setTriggerSelectionMode, setPendingTriggerElementId, editor, updateEditor, enterWindowEditMode } = useStoreconfig();
     const Data = editor?.elementsList;
     const [data, setData] = useState(interaction?.data || defaultInteractionConfig);
     const [activeTab, setActiveTab] = useState(interaction?.data?.type || 'none');
@@ -365,6 +365,56 @@ const InteractionModal = () => {
                 }}
                 items={items}
             />
+
+            {/* Window popup toggle — independent of interaction type */}
+            <div style={{ borderTop: '1px solid #f0f0f0', marginTop: 8, paddingTop: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: data.showWindow ? 12 : 0 }}>
+                    <Switch
+                        size="small"
+                        checked={!!data.showWindow}
+                        onChange={(v) => updateData('showWindow', v)}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 500 }}>Open Popup Window on click</span>
+                </div>
+                {data.showWindow && (
+                    <div className="flex flex-col gap-3">
+                        <ControlGroup label="Window Title">
+                            <Input
+                                value={data.windowTitle || ''}
+                                onChange={(e) => updateData('windowTitle', e.target.value)}
+                                placeholder="Popup Window Title"
+                            />
+                        </ControlGroup>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                                {(data.windowElements || []).length} element(s) in this window
+                            </span>
+                            <Button
+                                type="primary"
+                                size="small"
+                                onClick={() => {
+                                    const elementIndex = interaction?.elementIndex;
+                                    let duplicate = [...Data];
+                                    duplicate[elementIndex] = {
+                                        ...duplicate[elementIndex],
+                                        interaction: data,
+                                    };
+                                    updateEditor(duplicate);
+                                    setElementIndex(null);
+                                    setInteractionsData(null);
+                                    enterWindowEditMode({
+                                        elementIndex,
+                                        windowElements: data.windowElements || [],
+                                        windowTitle: data.windowTitle || 'Window',
+                                    });
+                                }}
+                            >
+                                Edit Window Content
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </Modal>
     );
 };

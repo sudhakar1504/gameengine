@@ -3,6 +3,7 @@ import React from 'react'
 
 const Pages = ({ setElementsOpen }: any) => {
     const { allpages, updateAllPages, setSelectedPage, editor, updateEditor } = useStoreconfig();
+    const isWindowEditMode = editor?.windowEditMode?.active;
 
     const addNewPageHandler = () => {
         updateAllPages([
@@ -19,6 +20,7 @@ const Pages = ({ setElementsOpen }: any) => {
     }
 
     const selectPageHandler = (id: number) => {
+        if (isWindowEditMode) return; // Block page switching during window edit
         let duplicateAllpages = [...allpages.pages]
         let findIndex = duplicateAllpages.findIndex((page: any) => page.id === allpages.selectedPage)
         duplicateAllpages[findIndex] = {
@@ -38,7 +40,7 @@ const Pages = ({ setElementsOpen }: any) => {
                 {allpages.pages.map((page: any) => (
                     <div key={page.id} className='flex flex-col items-center gap-1'>
                         <button
-                            className='flex flex-col items-center justify-center cursor-pointer rounded transition-all'
+                            className='flex flex-col items-center justify-center rounded transition-all'
                             style={{
                                 width: 80,
                                 height: 80,
@@ -46,9 +48,12 @@ const Pages = ({ setElementsOpen }: any) => {
                                 border: allpages.selectedPage === page.id
                                     ? '2px solid var(--accent-primary)'
                                     : '2px solid var(--border-default)',
-                                boxShadow: allpages.selectedPage === page.id ? '0 0 0 3px var(--accent-primary-border)' : 'none'
+                                boxShadow: allpages.selectedPage === page.id ? '0 0 0 3px var(--accent-primary-border)' : 'none',
+                                cursor: isWindowEditMode ? 'not-allowed' : 'pointer',
+                                opacity: isWindowEditMode && allpages.selectedPage !== page.id ? 0.4 : 1,
                             }}
                             onClick={() => selectPageHandler(page.id)}
+                            title={isWindowEditMode ? 'Finish editing the window before switching pages' : undefined}
                         >
                             <i className="fa-regular fa-file" style={{ fontSize: 20, color: 'var(--gray-500)', marginBottom: 4 }}></i>
                             <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--gray-700)' }}>{page.name}</span>
