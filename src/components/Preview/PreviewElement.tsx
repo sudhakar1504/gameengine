@@ -231,13 +231,22 @@ const PreviewElement = ({ item, onPageChange, width, height, onTriggerAnimation,
         // Handle Effect Interaction (only when type is 'effect')
         if (inter?.type === 'effect' && inter?.effectValue) {
             setActiveEffect(inter.effectValue);
-            setTimeout(() => {
-                setActiveEffect(null);
-            }, 3000);
+            setTimeout(() => setActiveEffect(null), 3000);
         }
 
+        // Handle page navigation (type === 'page') — navigate immediately, no audio wait
+        if (inter?.type === 'page' && inter?.targetPageId) {
+            onPageChange(Number(inter.targetPageId));
+            return;
+        }
 
+        // Handle link navigation (type === 'link')
+        if (inter?.type === 'link' && inter?.url) {
+            window.open(inter.url, inter?.target || '_blank');
+            return;
+        }
 
+        // For 'audio' type: play audio then optionally navigate
         const checkOtherInteraction = () => {
             if (inter?.targetPageId) {
                 onPageChange(Number(inter.targetPageId));
@@ -247,18 +256,16 @@ const PreviewElement = ({ item, onPageChange, width, height, onTriggerAnimation,
                 window.open(inter.url, inter?.target ? '_blank' : '_self');
                 return;
             }
-        }
+        };
 
-        if (inter?.audioSrc && inter?.audioSrc !== "" && audio) {
-            audio.src = inter?.audioSrc;
-            audio.play().catch(e => console.error("Audio playback failed", e));
+        if (inter?.type === 'audio' && inter?.audioSrc && inter?.audioSrc !== '' && audio) {
+            audio.src = inter.audioSrc;
+            audio.play().catch(e => console.error('Audio playback failed', e));
             audio.addEventListener('ended', () => {
                 audio.pause();
                 audio.currentTime = 0;
                 checkOtherInteraction();
-            });
-        } else {
-            checkOtherInteraction();
+            }, { once: true });
         }
     };
 

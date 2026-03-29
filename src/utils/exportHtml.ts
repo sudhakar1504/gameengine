@@ -70,12 +70,11 @@ function buildElementHtml(el: any, containerWidthVw: number): string {
         const scaleY = transform?.flipY ? -1 : 1;
         innerHtml = `<img src="${escapeHtml(src || '')}" style="width:100%;height:100%;object-fit:contain;${filterStr ? `filter:${filterStr};` : ''}transform:scaleX(${scaleX}) scaleY(${scaleY});" alt="" draggable="false" />`;
     } else if (type === 'text') {
-        const fs = `${(parseFloat(font?.fontSize || '0.1') / 100) * containerWidthVw}vw`;
+        const rawFs = parseFloat(font?.fontSize || '0.1');
         const fontStyle: Record<string, any> = {
             width: '100%',
             height: '100%',
             'font-family': font?.fontFamily || 'Arial',
-            'font-size': fs,
             'font-weight': font?.fontWeight || 'normal',
             'font-style': font?.fontStyle || 'normal',
             'text-decoration': font?.textDecoration || 'none',
@@ -84,7 +83,7 @@ function buildElementHtml(el: any, containerWidthVw: number): string {
             'letter-spacing': `${font?.letterSpacing || 0}px`,
             color: font?.color || '#000',
         };
-        innerHtml = `<div style="${styleObj(fontStyle)}">${escapeHtml(text || '')}</div>`;
+        innerHtml = `<div class="ge-text-content" data-raw-fs="${rawFs}" style="${styleObj(fontStyle)}">${escapeHtml(text || '')}</div>`;
     } else if (type === 'audio') {
         // hidden; autoplay handled by JS
         innerHtml = '';
@@ -95,8 +94,8 @@ function buildElementHtml(el: any, containerWidthVw: number): string {
                 return `<div style="${cs}"><img src="${escapeHtml(child.src || '')}" style="width:100%;height:100%;object-fit:contain;" alt="" /></div>`;
             }
             if (child.type === 'text') {
-                const fs = `${(parseFloat(child.font?.fontSize || '0.1') / 100) * containerWidthVw}vw`;
-                return `<div style="${cs}font-family:${child.font?.fontFamily || 'Arial'};font-size:${fs};color:${child.font?.color || '#000'}">${escapeHtml(child.text || '')}</div>`;
+                const rawFs = parseFloat(child.font?.fontSize || '0.1');
+                return `<div class="ge-text-content" data-raw-fs="${rawFs}" style="${cs}font-family:${child.font?.fontFamily || 'Arial'};color:${child.font?.color || '#000'}">${escapeHtml(child.text || '')}</div>`;
             }
             return '';
         }).join('');
@@ -261,7 +260,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Ari
 /* ── nav arrows ── */
 .ge-nav{
   position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
-  display:flex;gap:12px;z-index:99998;
+  display:flex;align-items:center;gap:12px;z-index:99999999;
 }
 .ge-nav button{
   background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
@@ -269,6 +268,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Ari
   backdrop-filter:blur(4px);transition:background .15s;
 }
 .ge-nav button:hover{background:rgba(255,255,255,.35);}
+.ge-nav button:disabled{opacity:.3;cursor:not-allowed;}
+.ge-nav-label{color:rgba(255,255,255,.6);font-size:12px;min-width:48px;text-align:center;}
 
 /* ── animation keyframes ── */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -382,6 +383,7 @@ ${windowPopupsHtml}
 
 <div class="ge-nav">
   <button id="btn-prev">&#8592; Prev</button>
+  <span class="ge-nav-label" id="ge-page-label">1 / 1</span>
   <button id="btn-next">Next &#8594;</button>
 </div>
 
@@ -433,6 +435,19 @@ function goToPageById(pageId){
   if(idx !== -1) goToPageIndex(idx);
 }
 
+function updateNavButtons(){
+  const pages = allPageEls();
+  const label = document.getElementById('ge-page-label');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  if(label) label.textContent = (currentPageIndex + 1) + ' / ' + pages.length;
+  if(btnPrev) btnPrev.disabled = currentPageIndex <= 0;
+  if(btnNext) btnNext.disabled = currentPageIndex >= pages.length - 1;
+  // hide nav entirely for single-page exports
+  const nav = document.querySelector('.ge-nav');
+  if(nav) nav.style.display = pages.length > 1 ? 'flex' : 'none';
+}
+
 function goToPageIndex(idx){
   const pages = allPageEls();
   if(idx < 0 || idx >= pages.length) return;
@@ -447,6 +462,7 @@ function goToPageIndex(idx){
   // re-run entrance animations and start background audio for new page
   runEntranceAnimations(pages[currentPageIndex]);
   startPageAudio(pages[currentPageIndex]);
+  updateNavButtons();
 }
 
 document.getElementById('btn-prev').addEventListener('click', () => goToPageIndex(currentPageIndex - 1));
@@ -629,18 +645,28 @@ function handleInteraction(elDiv){
     return;
   }
 
-  const proceed = () => {
-    if(inter.targetPageId) { goToPageById(inter.targetPageId); return; }
-    if(inter.url) { window.open(inter.url, inter.target || '_blank'); }
-  };
+  // page navigation — go immediately
+  if(inter.type === 'page' && inter.targetPageId){
+    goToPageById(inter.targetPageId);
+    return;
+  }
 
-  if(inter.audioSrc){
+  // link navigation — open immediately
+  if(inter.type === 'link' && inter.url){
+    window.open(inter.url, inter.target || '_blank');
+    return;
+  }
+
+  // audio — play then optionally navigate/link after
+  if(inter.type === 'audio' && inter.audioSrc){
     const a = new Audio(inter.audioSrc);
     a.loop = inter.loop || false;
     a.play().catch(()=>{});
-    a.addEventListener('ended', proceed);
-  } else {
-    proceed();
+    a.addEventListener('ended', () => {
+      if(inter.targetPageId) goToPageById(inter.targetPageId);
+      else if(inter.url) window.open(inter.url, inter.target || '_blank');
+    }, { once: true });
+    return;
   }
 }
 
@@ -881,6 +907,21 @@ function initPageElements(pageEl){
 }
 
 /* ─────────────────────────────────────────────
+   TEXT FONT SIZE (matches preview formula)
+   font-size = (rawFs / 100) * canvasClientWidth  vw
+───────────────────────────────────────────── */
+function applyTextFontSizes(){
+  const canvas = getCanvas();
+  if(!canvas) return;
+  const cw = canvas.clientWidth;
+  document.querySelectorAll('.ge-text-content[data-raw-fs]').forEach(function(el){
+    const raw = parseFloat(el.getAttribute('data-raw-fs') || '0.1');
+    el.style.fontSize = ((raw / 100) * cw) + 'vw';
+  });
+}
+window.addEventListener('resize', applyTextFontSizes);
+
+/* ─────────────────────────────────────────────
    BOOT
 ───────────────────────────────────────────── */
 document.querySelectorAll('.ge-page').forEach(pageEl => {
@@ -898,6 +939,12 @@ document.querySelectorAll('.ge-window-modal').forEach(modal => {
     elDiv.addEventListener('click', () => handleInteraction(elDiv));
   });
 });
+
+// apply text font sizes (uses canvas pixel width, same as preview)
+applyTextFontSizes();
+
+// initialise nav button states
+updateNavButtons();
 
 // run entrance on first page
 const firstPage = document.querySelector('.ge-page');

@@ -9,4 +9,4 @@ const PreviewPage = () => {
     )
 }
 
-export default Preview
+export default PreviewPage

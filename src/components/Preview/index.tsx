@@ -24,6 +24,21 @@ const Preview = () => {
         return allpages?.pages?.find((p: any) => p.id === allpages?.selectedPage) || allpages?.pages?.[0];
     }, [allpages?.pages, allpages?.selectedPage]);
 
+    const pages = allpages?.pages || [];
+    const currentPageIndex = pages.findIndex((p: any) => p.id === (currentPage?.id ?? allpages?.selectedPage));
+
+    const goToPageIndex = (idx: number) => {
+        if (idx < 0 || idx >= pages.length) return;
+        const newPage = pages[idx];
+        // reset per-page state
+        setDroppedElements(new Set());
+        setAnimTriggers({});
+        setElementActions({});
+        missedTimers.current.forEach(t => clearTimeout(t));
+        missedTimers.current.clear();
+        setSelectedPage(newPage.id);
+    };
+
     const handleTriggerAnimation = (elementId: string | number, animConfig: any) => {
         setAnimTriggers(prev => ({
             ...prev,
@@ -132,6 +147,11 @@ const Preview = () => {
         backgroundColor: '#ffffff'
     };
 
+    const handlePageChange = (id: number) => {
+        const idx = pages.findIndex((p: any) => p.id === id);
+        if (idx !== -1) goToPageIndex(idx);
+    };
+
     return (
         <div className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center">
             {/* Close Button */}
@@ -155,9 +175,6 @@ const Preview = () => {
                     ...bgState
                 }}
             >
-                <div className="absolute top-0 left-0 p-1 text-[10px] text-gray-400 z-[10001] pointer-events-none">
-                    Width: {dimensions.width}px
-                </div>
                 {score !== 0 && (
                     <div className="absolute top-2 right-2 z-[10001] bg-black/60 text-white text-sm px-3 py-1 rounded-full backdrop-blur-sm pointer-events-none">
                         ⭐ Score: {score > 0 ? '+' : ''}{score}
@@ -171,7 +188,7 @@ const Preview = () => {
                             height={dimensions.height}
                             key={item.id}
                             item={item}
-                            onPageChange={(id) => { setSelectedPage(id); }}
+                            onPageChange={handlePageChange}
                             onTriggerAnimation={handleTriggerAnimation}
                             externalAnimTrigger={animTriggers[item.id]}
                             onDrop={handleDrop}
@@ -182,6 +199,29 @@ const Preview = () => {
                     );
                 })}
             </div>
+
+            {/* Page Navigation */}
+            {pages.length > 1 && (
+                <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-[10000] flex items-center gap-3">
+                    <button
+                        onClick={() => goToPageIndex(currentPageIndex - 1)}
+                        disabled={currentPageIndex <= 0}
+                        className="px-4 py-1.5 rounded border border-white/40 bg-white/20 hover:bg-white/35 text-white text-sm backdrop-blur-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                        ← Prev
+                    </button>
+                    <span className="text-white/70 text-xs tabular-nums">
+                        {currentPageIndex + 1} / {pages.length}
+                    </span>
+                    <button
+                        onClick={() => goToPageIndex(currentPageIndex + 1)}
+                        disabled={currentPageIndex >= pages.length - 1}
+                        className="px-4 py-1.5 rounded border border-white/40 bg-white/20 hover:bg-white/35 text-white text-sm backdrop-blur-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                        Next →
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
