@@ -105,9 +105,39 @@ const InteractionModal = () => {
                             placeholder="Pick from audio list"
                         />
                     </ControlGroup>
+                    <ControlGroup label="Upload Audio File">
+                        <div className="flex gap-2 items-center">
+                            <input
+                                type="file"
+                                accept="audio/*"
+                                style={{ display: 'none' }}
+                                id="interaction-audio-upload"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = () => updateData('audioSrc', reader.result as string);
+                                    reader.readAsDataURL(file);
+                                    e.target.value = '';
+                                }}
+                            />
+                            <Button
+                                icon={<i className="fa-solid fa-upload" style={{ fontSize: 11 }} />}
+                                onClick={() => document.getElementById('interaction-audio-upload')?.click()}
+                            >
+                                Upload
+                            </Button>
+                            {data.audioSrc?.startsWith('data:') && (
+                                <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                                    <i className="fa-solid fa-check" style={{ color: '#22c55e', marginRight: 4 }} />
+                                    File loaded
+                                </span>
+                            )}
+                        </div>
+                    </ControlGroup>
                     <ControlGroup label="Or Paste Audio URL">
                         <Input
-                            value={data.audioSrc}
+                            value={data.audioSrc?.startsWith('data:') ? '' : data.audioSrc}
                             onChange={(e) => updateData('audioSrc', e.target.value)}
                             placeholder="https://example.com/audio.mp3"
                         />

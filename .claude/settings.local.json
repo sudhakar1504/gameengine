@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(xargs grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(head -100 /d/fullstack/gamengine/src/components/ImageGallery/*.tsx)",
+      "Bash(grep -r \"base64\\\\|FileReader\\\\|Blob\\\\|FormData\" /d/fullstack/gamengine/src --include=*.ts --include=*.tsx --include=*.js --include=*.jsx)",
+      "Bash(npm run:*)"
     ]
   }
 }

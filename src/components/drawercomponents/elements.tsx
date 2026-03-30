@@ -1,5 +1,5 @@
 import { Collapse, Modal, Button } from 'antd';
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { defaultImageConfig, defaultTextConfig, defaultAudioConfig, defaultAnimationConfig, defaultInteractionConfig } from '@/utils/config/defaults';
 import { audioList } from '@/utils/config/audioList';
 import { imageList } from '@/utils/config/imageList';
@@ -68,6 +68,44 @@ const Elements = ({ setElementsOpen }: any) => {
 
     const [audioModalOpen, setAudioModalOpen] = useState(false);
     const [selectedAudioItem, setSelectedAudioItem] = useState<any>(null);
+
+    const imageUploadRef = useRef<HTMLInputElement>(null);
+    const bgUploadRef = useRef<HTMLInputElement>(null);
+    const audioUploadRef = useRef<HTMLInputElement>(null);
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            imageHandler(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    };
+
+    const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            bgHandler(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    };
+
+    const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            setSelectedAudioItem({ name: file.name, src: reader.result as string });
+            setAudioModalOpen(true);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    };
 
     const handleSelectFromGallery = (src: string) => {
         let duplicate = [...editor?.elementsList]
@@ -182,15 +220,26 @@ const Elements = ({ setElementsOpen }: any) => {
             children: <div className='flex flex-col gap-3 pt-1'>
                 <div className='flex justify-between items-center p-2 rounded' style={{ background: 'var(--gray-50)', border: '1px dashed var(--gray-300)' }}>
                     <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500 }}>Recommended Images</span>
-                    <Button
-                        type="primary"
-                        size="small"
-                        onClick={() => setImageGalleryOpen(true)}
-                        className='text-[10px] h-6'
-                    >
-                        View All
-                    </Button>
+                    <div className='flex gap-1'>
+                        <Button
+                            size="small"
+                            onClick={() => imageUploadRef.current?.click()}
+                            className='text-[10px] h-6'
+                            icon={<i className="fa-solid fa-upload" style={{ fontSize: 10 }} />}
+                        >
+                            Upload
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => setImageGalleryOpen(true)}
+                            className='text-[10px] h-6'
+                        >
+                            View All
+                        </Button>
+                    </div>
                 </div>
+                <input ref={imageUploadRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
                 <div className='flex flex-wrap gap-2'>
                     {imageList.map((element: any) => (
                         <button
@@ -210,25 +259,51 @@ const Elements = ({ setElementsOpen }: any) => {
         {
             key: '3',
             label: 'Background',
-            children: <div className='flex flex-wrap gap-2 pt-1'>
-                {bgList.map((element: any) => (
-                    <button
-                        onClick={() => bgHandler(element.Image)}
-                        key={element.id}
-                        className='cursor-pointer overflow-hidden transition-all'
-                        style={{ width: 80, height: 80, background: 'var(--gray-100)', border: '1px solid var(--border-default)', borderRadius: 6 }}
-                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+            children: <div className='flex flex-col gap-3 pt-1'>
+                <div className='flex justify-between items-center p-2 rounded' style={{ background: 'var(--gray-50)', border: '1px dashed var(--gray-300)' }}>
+                    <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500 }}>Or upload your own</span>
+                    <Button
+                        size="small"
+                        onClick={() => bgUploadRef.current?.click()}
+                        className='text-[10px] h-6'
+                        icon={<i className="fa-solid fa-upload" style={{ fontSize: 10 }} />}
                     >
-                        <img loading='lazy' src={element.Image} className='w-full h-full object-contain' alt="" />
-                    </button>
-                ))}
+                        Upload
+                    </Button>
+                </div>
+                <input ref={bgUploadRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBgUpload} />
+                <div className='flex flex-wrap gap-2'>
+                    {bgList.map((element: any) => (
+                        <button
+                            onClick={() => bgHandler(element.Image)}
+                            key={element.id}
+                            className='cursor-pointer overflow-hidden transition-all'
+                            style={{ width: 80, height: 80, background: 'var(--gray-100)', border: '1px solid var(--border-default)', borderRadius: 6 }}
+                            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
+                            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+                        >
+                            <img loading='lazy' src={element.Image} className='w-full h-full object-contain' alt="" />
+                        </button>
+                    ))}
+                </div>
             </div>,
         },
         {
             key: '4',
             label: 'Audio',
             children: <div className='flex flex-col gap-1.5 pt-1'>
+                <div className='flex justify-between items-center p-2 rounded' style={{ background: 'var(--gray-50)', border: '1px dashed var(--gray-300)' }}>
+                    <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500 }}>Upload audio file</span>
+                    <Button
+                        size="small"
+                        onClick={() => audioUploadRef.current?.click()}
+                        className='text-[10px] h-6'
+                        icon={<i className="fa-solid fa-upload" style={{ fontSize: 10 }} />}
+                    >
+                        Upload
+                    </Button>
+                </div>
+                <input ref={audioUploadRef} type="file" accept="audio/*" style={{ display: 'none' }} onChange={handleAudioUpload} />
                 {audioList.map((audio: any) => (
                     <button
                         onClick={() => {
@@ -253,7 +328,7 @@ const Elements = ({ setElementsOpen }: any) => {
             <Collapse accordion items={items} defaultActiveKey={['1']} />
 
             <Modal
-                title="Audio Options"
+                title={`Audio Options${selectedAudioItem ? ` — ${selectedAudioItem.name}` : ''}`}
                 open={audioModalOpen}
                 onCancel={() => setAudioModalOpen(false)}
                 footer={null}
